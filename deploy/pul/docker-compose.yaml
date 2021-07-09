@@ -1,0 +1,16 @@
+version: '3'
+
+services:
+  db:
+    image: mysql:5.7.31
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: L0ng1viE@CPC
+    expose:
+      - "3306"
+    ports:
+      - "3306:3306"
+    volumes:
+      - "./db:/var/lib/mysql"
+      - "./mysql.cnf:/etc/mysql/my.cnf"
