@@ -2,15 +2,16 @@ version: '3'
 
 services:
   db:
-    image: mysql:5.7.31
-    command: --default-authentication-plugin=mysql_native_password
+    image: postgres:13.3-parquet-fdw
     restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: L0ng1viE@CPC
     expose:
-      - "3306"
+      - "5432:5432"
     ports:
-      - "3306:3306"
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: pul
+      POSTGRES_PASSWORD: "L0ngL1vE@CPC"
+      POSTGRES_DB: pul
     volumes:
-      - "./db:/var/lib/mysql"
-      - "./mysql.cnf:/etc/mysql/my.cnf"
+      - "./db:/var/lib/postgresql/data"
+      - "./external:/mnt/data"
