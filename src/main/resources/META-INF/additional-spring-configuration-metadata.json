@@ -1,0 +1,14 @@
+{
+  "properties": [
+    {
+      "name": "rserver.host",
+      "type": "java.lang.String",
+      "description": "Description for rserver.host."
+    },
+    {
+      "name": "rserver.port",
+      "type": "java.lang.String",
+      "description": "Description for rserver.port."
+    }
+  ]
+}
