@@ -15,3 +15,10 @@ services:
     volumes:
       - "./db:/var/lib/postgresql/data"
       - "./external:/mnt/data"
+  rserver:
+    image: rserver:4.1.0
+    restart: always
+    expose:
+      - "6311:6311"
+    ports:
+      - "6311:6311"
