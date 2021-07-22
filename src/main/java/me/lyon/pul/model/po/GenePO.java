@@ -1,17 +1,17 @@
 package me.lyon.pul.model.po;
 
 import com.vladmihalcea.hibernate.type.array.ListArrayType;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.List;
 
 @Entity
+@Immutable
 @Table(name = "gene")
 @TypeDef(
         name = "string-array",
@@ -21,13 +21,15 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class GenePO {
+public class GenePO implements Serializable {
     @Id
     private String id;
     @Column(name = "gene_name")
     private String geneName;
-    @Column(name = "pul_id")
-    private String pulId;
+    @ToString.Exclude
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "pul_id", referencedColumnName = "id", nullable = false)
+    private PulPO pul;
     @Type(type = "string-array")
     @Column(name = "domain", columnDefinition = "varchar(64)[]")
     private List<String> domain;

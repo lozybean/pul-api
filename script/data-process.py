@@ -9,12 +9,12 @@ def process_pul():
     df = pd.read_csv(FILE_DIR / 'pul_information', sep='\t')
     df = (df.rename(columns={'PUL_id': 'id', 'PUL_type': 'type', 'GCF_number': 'GCF_id',
                              'PUL_locus_start': 'locus_start', 'PUL_locus_end': 'locus_end'})
-              .assign(GCF_number=lambda _df: _df['GCF_id'].map('GCF_{:09d}'.format),
-                      PUL_id=lambda _df: _df[['GCF_number', 'contig_name', 'locus_start', 'locus_end']]
+              .assign(PUL_id=lambda _df: _df[['contig_name', 'locus_start', 'locus_end']]
                       .astype(str)
                       .agg('_'.join, axis=1))
-              .loc[:, ['id', 'PUL_id', 'type', 'GCF_id', 'GCF_number',
-                       'taxid', 'contig_name', 'locus_start', 'locus_end']])
+              .loc[:, ['id', 'PUL_id', 'type', 'GCF_id', 'contig_name', 'locus_start', 'locus_end']]
+              .drop_duplicates(subset=['id'])
+    )
     df.to_parquet(FILE_DIR / 'pul.parquet', engine='pyarrow', compression='snappy')
     return df
 
@@ -38,7 +38,9 @@ def process_pul_gene():
               .assign(gene_name=lambda _df: _df['PUL_name'] + '.' + (df.groupby('PUL_id').cumcount() + 1).astype(str),
                       domain=lambda _df: _df['domain'].apply(literal_return))
               .loc[:, ['id', 'gene_name', 'PUL_id', 'locus_start', 'locus_end',
-                       'domain', 'score', 'classification']])
+                       'domain', 'score', 'classification']]
+              .drop_duplicates(subset=['id'])
+    )
     df.to_parquet(FILE_DIR / 'gene.parquet', engine='pyarrow', compression='snappy')
     return df
 
@@ -46,15 +48,19 @@ def process_pul_gene():
 def process_species():
     df = pd.read_csv(FILE_DIR / 'species_information', sep='\t')
     phyla = df.phyla_information.str.split('-')
-    df = (df.assign(Kingdom=phyla.apply(lambda x: x[0]),
-                    Phylum=phyla.apply(lambda x: x[1] if len(x) > 1 else None),
-                    Class=phyla.apply(lambda x: x[2] if len(x) > 2 else None),
-                    Order=phyla.apply(lambda x: x[3] if len(x) > 3 else None),
-                    Family=phyla.apply(lambda x: x[4] if len(x) > 4 else None),
-                    Genus=phyla.apply(lambda x: x[5] if len(x) > 5 else None))
+    df = (df.rename(columns={'GCF_number': 'id'})
+              .assign(GCF_number=lambda _df: _df['id'].map('GCF_{:09d}'.format),
+                      Kingdom=phyla.apply(lambda x: x[0]),
+                      Phylum=phyla.apply(lambda x: x[1] if len(x) > 1 else None),
+                      Class=phyla.apply(lambda x: x[2] if len(x) > 2 else None),
+                      Order=phyla.apply(lambda x: x[3] if len(x) > 3 else None),
+                      Family=phyla.apply(lambda x: x[4] if len(x) > 4 else None),
+                      Genus=phyla.apply(lambda x: x[5] if len(x) > 5 else None))
               .rename(columns={'species_name': 'Species'})
-              .loc[:, ['taxid', 'Kingdom', 'Phylum', 'Class', 'Order',
-                       'Family', 'Genus', 'Species', 'assemble_level', 'phyla_information']])
+              .loc[:, ['id', 'GCF_number', 'taxid', 'Kingdom', 'Phylum', 'Class', 'Order',
+                       'Family', 'Genus', 'Species', 'assemble_level', 'phyla_information']]
+              .drop_duplicates(subset=['id'])
+          )
     df.to_parquet(FILE_DIR / 'species.parquet', engine='pyarrow', compression='snappy')
     return df
 

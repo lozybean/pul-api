@@ -4,23 +4,33 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Immutable;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import java.io.Serializable;
 
 @Entity
+@Immutable
 @Table(name = "species")
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class SpeciesPO {
+public class SpeciesPO implements Serializable {
     @Id
+    @Column(name = "id")
+    private Integer id;
+    @Column(name = "gcf_number")
+    private String gcfNumber;
+    @Column(name = "taxid")
     private Integer taxid;
     @Column(name = "kingdom")
     private String spKingdom;
+    @Column(name = "phylum")
+    private String spPhylum;
     @Column(name = "class")
     private String spClass;
     @Column(name = "order")
