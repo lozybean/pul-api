@@ -1,6 +1,6 @@
 source .env
 SQL_MIGRATION_IMAGE="pul-sql-migration:${VERSION}"
-APP_IMAGE="pul_api:${VERSION}"
+APP_IMAGE="pul-api:${VERSION}"
 
 cd sql-migration || {
   echo "dir:sql-migration not exists!"

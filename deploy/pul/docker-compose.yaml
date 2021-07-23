@@ -25,7 +25,7 @@ services:
   redis:
     image: redis:4.0.13
     expose:
-      - "6379"
+      - "6379:6379"
     ports:
       - "6379:6379"
 
@@ -36,19 +36,20 @@ services:
       - migrate
       - -X
     environment:
-      FLYWAY_URL: 'jdbc:mysql://db:3306?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=UTC'
-      FLYWAY_USER: 'root'
-      FLYWAY_PASSWORD: 'stmedical'
-      FLYWAY_SCHEMAS: 'cmoi'
+      FLYWAY_USER: 'pul'
+      FLYWAY_URL: 'jdbc:postgresql://db:5432/pul'
+      FLYWAY_PASSWORD: 'L0ngL1vE@CPC'
+      FLYWAY_SCHEMAS: 'public'
     depends_on:
       - db
-  api:
+  pul-api:
     image: pul-api:2.0.0
     expose:
       - "8080"
     environment:
+      SPRING_PROFILES_ACTIVE: "prod"
       PORT: '8080'
-      POSTGRE_URL: 'db'
+      POSTGRE_HOST: 'db'
       POSTGRE_PORT: '5432'
       POSTGRE_DB: 'pul'
       POSTGRE_USER: 'pul'
@@ -57,15 +58,25 @@ services:
       REDIS_PORT: '6379'
       REDIS_DB: '1'
       RSERVER_HOST: 'rserver'
-      RSERVER_PORT: '6311'
+      RSERVER_PORT: 6311
     depends_on:
+      - db
+      - rserver
+      - redis
+    links:
       - db
       - rserver
       - redis
   pul:
     image: pul:2.0.0
     expose:
-      - "80"
+      - "81:80"
+    ports:
+      - "81:80"
     depends_on:
-      - api
+      - pul-api
+    volumes:
+      - "./static:/data/static"
+    links:
+      - pul-api
 

@@ -16,7 +16,7 @@ public class RserverConfig {
 
     @Bean
     public RConnection rConnection() throws RserveException {
-        RConnection rConnection = new RConnection("127.0.0.1", 6311);
+        RConnection rConnection = new RConnection(host, port);
         rConnection.eval("library(ggplot2)\n" +
                 "library(gggenes)\n" +
                 "library(base64enc)\n" +
