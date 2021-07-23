@@ -1,0 +1,33 @@
+spring:
+  application:
+    name: pul-api
+  cache:
+    type: redis
+    redis:
+      time-to-live: "P30D"
+  jackson:
+    time-zone: GMT+8
+    date-format: yyyy-MM-dd HH:mm:ss
+  datasource:
+    url: 'jdbc:postgresql://${POSTGRE_HOST}:${POSTGRE_PORT}/${POSTGRE_DB}'
+    username: ${POSTGRE_USER}
+    password: ${POSTGRE_PASS}
+  jpa:
+    show-sql: true
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+  servlet:
+    multipart:
+      max-file-size: -1
+      max-request-size: -1
+      enabled: true
+  redis:
+    host: ${REDIS_HOST}
+    port: ${REDIS_PORT}
+    database: ${REDIS_DB}
+
+server:
+  port: ${PORT}
+
+rserver:
+  host: ${RSERVER_HOST}
+  port: ${RSERVER_PORT}

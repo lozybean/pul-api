@@ -1,7 +1,7 @@
 FROM flyway/flyway:7-alpine
 
-ENV FLYWAY_USER='root'
-ENV FLYWAY_URL='jdbc:mysql://mysql:3306?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=UTC'
+ENV FLYWAY_USER='pul'
+ENV FLYWAY_URL='jdbc:postgresql://db:5432/pul'
 ENV FLYWAY_PASSWORD='L0ng1viE@CPC'
 ENV FLYWAY_SCHEMAS='pul'
 ENV FLYWAY_LOCATIONS='filesystem:/migrations'

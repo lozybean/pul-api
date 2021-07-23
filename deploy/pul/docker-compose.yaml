@@ -28,3 +28,44 @@ services:
       - "6379"
     ports:
       - "6379:6379"
+
+  sql-migration:
+    image: pul-sql-migration:2.0.0
+    entrypoint:
+      - flyway
+      - migrate
+      - -X
+    environment:
+      FLYWAY_URL: 'jdbc:mysql://db:3306?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=UTC'
+      FLYWAY_USER: 'root'
+      FLYWAY_PASSWORD: 'stmedical'
+      FLYWAY_SCHEMAS: 'cmoi'
+    depends_on:
+      - db
+  api:
+    image: pul-api:2.0.0
+    expose:
+      - "8080"
+    environment:
+      PORT: '8080'
+      POSTGRE_URL: 'db'
+      POSTGRE_PORT: '5432'
+      POSTGRE_DB: 'pul'
+      POSTGRE_USER: 'pul'
+      POSTGRE_PASS: 'L0ngL1vE@CPC'
+      REDIS_HOST: 'redis'
+      REDIS_PORT: '6379'
+      REDIS_DB: '1'
+      RSERVER_HOST: 'rserver'
+      RSERVER_PORT: '6311'
+    depends_on:
+      - db
+      - rserver
+      - redis
+  pul:
+    image: pul:2.0.0
+    expose:
+      - "80"
+    depends_on:
+      - api
+
