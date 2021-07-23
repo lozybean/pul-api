@@ -5,9 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import me.lyon.pul.model.vo.PageData;
-import me.lyon.pul.model.vo.PulInfo;
-import me.lyon.pul.model.vo.WebResponse;
+import me.lyon.pul.model.vo.*;
 import me.lyon.pul.service.GggeneService;
 import me.lyon.pul.service.PulService;
 import org.springframework.data.domain.PageRequest;
@@ -16,6 +14,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -137,4 +136,17 @@ public class PulController {
             return WebResponse.warn("未找到对应的PUL信息！");
         }
     }
+
+    @GetMapping("browse")
+    @ResponseBody
+    public WebResponse<BrowseData> getBrowseData() {
+        List<NameCount> aggregateByType = pulService.aggregateByType();
+        List<NameCount> aggregateByPhylum = pulService.aggregateByPhylum();
+        BrowseData browseData = BrowseData.builder()
+                .polysaccharide(aggregateByType)
+                .phylum(aggregateByPhylum)
+                .build();
+        return WebResponse.ok(browseData);
+    }
+
 }

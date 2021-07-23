@@ -2,6 +2,7 @@ package me.lyon.pul.service.impl;
 
 import me.lyon.pul.model.mapper.PulMapper;
 import me.lyon.pul.model.po.PulPO;
+import me.lyon.pul.model.vo.NameCount;
 import me.lyon.pul.model.vo.PageData;
 import me.lyon.pul.model.vo.PulInfo;
 import me.lyon.pul.repository.PulRepository;
@@ -20,7 +21,7 @@ import javax.persistence.criteria.Predicate;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@CacheConfig(cacheNames = {"pulInfo", "pulInfoPage"})
+@CacheConfig(cacheNames = {"pulInfo", "pulInfoPage", "aggregateByType", "aggregateByPhylum"})
 @Service
 public class PulServiceImpl implements PulService {
     private static final Set<String> MAIN_PHYLUM_LIST = Set.of("Actinobacteria", "Bacteroidetes", "Firmicutes", "Proteobacteria");
@@ -101,5 +102,15 @@ public class PulServiceImpl implements PulService {
                 .build();
     }
 
+    @Cacheable(cacheNames = "aggregateByType")
+    @Override
+    public List<NameCount> aggregateByType() {
+        return pulRepository.countTotalPulPOSByTypeClass();
+    }
 
+    @Cacheable(cacheNames = "aggregateByPhylum")
+    @Override
+    public List<NameCount> aggregateByPhylum() {
+        return pulRepository.countTotalPulPOSBySpeciesSpPhylumClass();
+    }
 }

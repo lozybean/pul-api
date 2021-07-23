@@ -1,9 +1,11 @@
 package me.lyon.pul.service;
 
+import me.lyon.pul.model.vo.NameCount;
 import me.lyon.pul.model.vo.PageData;
 import me.lyon.pul.model.vo.PulInfo;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
 import java.util.Optional;
 
 
@@ -49,4 +51,18 @@ public interface PulService {
      * @return :
      */
     PageData<PulInfo> queryPulByDomainName(String domainName, Pageable pageable);
+
+    /**
+     * 根据类型聚合
+     *
+     * @return :
+     */
+    List<NameCount> aggregateByType();
+
+    /**
+     * 根据物种门聚合
+     *
+     * @return :
+     */
+    List<NameCount> aggregateByPhylum();
 }
