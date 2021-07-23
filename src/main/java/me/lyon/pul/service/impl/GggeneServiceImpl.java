@@ -6,23 +6,27 @@ import me.lyon.pul.service.GggeneService;
 import org.rosuda.REngine.REXPMismatchException;
 import org.rosuda.REngine.REngineException;
 import org.rosuda.REngine.Rserve.RConnection;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.Arrays;
 
 @Service
+@CacheConfig(cacheNames = {"gggenes"})
 public class GggeneServiceImpl implements GggeneService {
     @Resource(name = "rConnection")
     RConnection rConnection;
 
 
+    @Cacheable(cacheNames = "ggenes", key = "#pulInfo.id")
     @Override
-    public String plotWithBase64(PulInfo pulInfo) throws REngineException, REXPMismatchException {
-        String[] geneName = (String[]) pulInfo.getContent()
+    public synchronized String plotWithBase64(PulInfo pulInfo) throws REngineException, REXPMismatchException {
+        String[] geneName = pulInfo.getContent()
                 .stream()
-                .map(PulContent::getGeneName)
-                .toArray();
+                .map(PulContent::getGeneId)
+                .toArray(String[]::new);
         int[] starts = pulInfo.getContent().stream().map(PulContent::getGeneStart).mapToInt(i -> i).toArray();
         int[] ends = pulInfo.getContent().stream().map(PulContent::getGeneEnd).mapToInt(i -> i).toArray();
 
@@ -34,11 +38,22 @@ public class GggeneServiceImpl implements GggeneService {
         rConnection.assign("start", starts);
         rConnection.assign("end", ends);
         rConnection.eval("data <- data.frame( list(molecule=molecule, gene=gene, start=start, end=end) )");
-        rConnection.eval("gg <- ggplot(data, aes(xmin = start, xmax = end, y = molecule, fill = gene) ) +\n" +
-                "  geom_gene_arrow() +\n" +
-                "  facet_wrap(~ molecule, scales = \"free\", ncol = 1) +\n" +
-                "  scale_fill_brewer(palette = \"Set3\") +\n" +
-                "  theme_genes()\n");
+        rConnection.eval(String.format("gg <- ggplot(data, aes(xmin = start, xmax = end, y = molecule, fill = gene, label = gene)) +\n" +
+                        "  geom_gene_arrow(arrowhead_height = unit(3, \"mm\"), arrowhead_width = unit(1, \"mm\")) +\n" +
+                        "  annotate(\"text\",x=%d,y=1.4,label=\"%s\",hjust=0.1) +\n" +
+                        "  annotate(\"curve\",x=%d,y=1.3, xend = %d, yend = 1.05, curvature = 0, arrow = arrow(length = unit(2, \"mm\"))) +" +
+                        "  annotate(\"text\",x=%d,y=1.4,label=\"%s\",hjust=0.9) +\n" +
+                        "  annotate(\"curve\",x=%d,y=1.3, xend = %d, yend = 1.05, curvature = 0, arrow = arrow(length = unit(2, \"mm\"))) +" +
+                        "  facet_wrap(~ molecule, scales = \"free\", ncol = 1) +\n" +
+                        "  discrete_scale(\"fill\", \"manual\", palette_Set3) +\n" +
+                        "  theme_genes() +\n" +
+                        "  theme(legend.position=\"none\")",
+                starts[0], geneName[0],
+                starts[0], starts[0],
+                ends[ends.length - 1], geneName[geneName.length - 1],
+                ends[ends.length - 1], ends[ends.length - 1]
+                )
+        );
 
         return rConnection.eval("encodeGraphic(gg)").asString();
     }

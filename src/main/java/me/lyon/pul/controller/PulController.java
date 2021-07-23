@@ -1,10 +1,14 @@
 package me.lyon.pul.controller;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import me.lyon.pul.model.vo.PageData;
 import me.lyon.pul.model.vo.PulInfo;
 import me.lyon.pul.model.vo.WebResponse;
+import me.lyon.pul.service.GggeneService;
 import me.lyon.pul.service.PulService;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -16,11 +20,14 @@ import java.util.Map;
 import java.util.Optional;
 
 
+@Slf4j
 @RestController
 @RequestMapping(value = "api")
 public class PulController {
     @Resource
     PulService pulService;
+    @Resource
+    GggeneService gggeneService;
 
     static Map<String, String> sortFieldMap = Map.of(
             "pul_id", "pulId",
@@ -100,6 +107,32 @@ public class PulController {
         Optional<PulInfo> pulInfo = pulService.queryById(id);
         if (pulInfo.isPresent()) {
             return WebResponse.ok(pulInfo.get());
+        } else {
+            return WebResponse.warn("未找到对应的PUL信息！");
+        }
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    static class Gggenes {
+        private String base64;
+    }
+
+    @GetMapping("{id}/gggenes")
+    @ResponseBody
+    public WebResponse<Gggenes> plotGggenes(
+            @PathVariable String id
+    ) {
+        Optional<PulInfo> pulInfo = pulService.queryById(id);
+        if (pulInfo.isPresent()) {
+            try {
+                String base64 = gggeneService.plotWithBase64(pulInfo.get());
+                return WebResponse.ok(new Gggenes(base64));
+            } catch (Exception e) {
+                log.warn("Ggenes绘制失败！{}", pulInfo.get().getPulId(), e);
+                return WebResponse.warn("Gggenes绘制失败，请检查！");
+            }
         } else {
             return WebResponse.warn("未找到对应的PUL信息！");
         }

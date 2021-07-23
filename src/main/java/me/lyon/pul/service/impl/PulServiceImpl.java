@@ -6,6 +6,8 @@ import me.lyon.pul.model.vo.PageData;
 import me.lyon.pul.model.vo.PulInfo;
 import me.lyon.pul.repository.PulRepository;
 import me.lyon.pul.service.PulService;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -18,6 +20,7 @@ import javax.persistence.criteria.Predicate;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@CacheConfig(cacheNames = {"pulInfo", "pulInfoPage"})
 @Service
 public class PulServiceImpl implements PulService {
     private static final Set<String> MAIN_PHYLUM_LIST = Set.of("Actinobacteria", "Bacteroidetes", "Firmicutes", "Proteobacteria");
@@ -25,12 +28,14 @@ public class PulServiceImpl implements PulService {
     @Resource
     PulRepository pulRepository;
 
+    @Cacheable(cacheNames = "pulInfo", key = "#id")
     @Override
     public Optional<PulInfo> queryById(String id) {
         return pulRepository.findById(id)
                 .map(PulMapper.INSTANCE::pulInfo);
     }
 
+    @Cacheable(cacheNames = "pulInfoPage")
     @Override
     public PageData<PulInfo> queryPulByType(String pulType, Pageable pageable) {
         Page<PulPO> pulPoPage = pulRepository.findAllByTypeIgnoreCase(pulType, pageable);
@@ -43,6 +48,7 @@ public class PulServiceImpl implements PulService {
                 .build();
     }
 
+    @Cacheable(cacheNames = "pulInfoPage")
     @Override
     public PageData<PulInfo> queryPulByLinage(Integer taxonomyId, String assemblyAccession, String spSpecies, String spPhylum, Pageable pageable) {
         final String speciesProp = "species";
@@ -82,6 +88,7 @@ public class PulServiceImpl implements PulService {
                 .build();
     }
 
+    @Cacheable(cacheNames = "pulInfoPage")
     @Override
     public PageData<PulInfo> queryPulByDomainName(String domainName, Pageable pageable) {
         Page<PulPO> pulPoPage = pulRepository.findAllByDomain(domainName.toLowerCase(), pageable);

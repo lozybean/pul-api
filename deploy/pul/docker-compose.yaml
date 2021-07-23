@@ -22,3 +22,9 @@ services:
       - "6311:6311"
     ports:
       - "6311:6311"
+  redis:
+    image: redis:4.0.13
+    expose:
+      - "6379"
+    ports:
+      - "6379:6379"

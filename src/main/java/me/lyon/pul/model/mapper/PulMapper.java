@@ -28,6 +28,7 @@ public interface PulMapper {
     @Mapping(target = "content", source = "contents")
     PulInfo pulInfo(PulPO po);
 
+    @Mapping(target = "geneId", source = "id")
     @Mapping(target = "geneName", source = "geneName")
     @Mapping(target = "geneType", source = "classification")
     @Mapping(target = "geneStart", source = "locusStart")

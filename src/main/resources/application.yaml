@@ -1,6 +1,10 @@
 spring:
   application:
     name: pul-api
+  cache:
+    type: redis
+    redis:
+      time-to-live: "P30D"
   jackson:
     time-zone: GMT+8
     date-format: yyyy-MM-dd HH:mm:ss
@@ -16,6 +20,10 @@ spring:
       max-file-size: -1
       max-request-size: -1
       enabled: true
+  redis:
+    host: localhost
+    port: 6379
+    database: 1
 
 server:
   port: 8081
