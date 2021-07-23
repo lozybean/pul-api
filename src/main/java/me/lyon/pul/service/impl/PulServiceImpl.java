@@ -29,6 +29,22 @@ public class PulServiceImpl implements PulService {
     @Resource
     PulRepository pulRepository;
 
+    static Map<String, String> sortFieldMap = Map.of(
+            "pul_id", "pulId",
+            "pul_type", "type",
+            "assembly_accession", "species.gcfNumber",
+            "species", "species.spSpecies",
+            "phylum", "species.spPhylum"
+    );
+    static Map<String, String> nativeSortFieldMap = Map.of(
+            "pul_id", "pul_id",
+            "pul_type", "type",
+            "assembly_accession", "species.gcf_number",
+            "species", "species.species",
+            "phylum", "species.phylum"
+    );
+
+
     @Cacheable(cacheNames = "pulInfo", key = "#id")
     @Override
     public Optional<PulInfo> queryById(String id) {
@@ -36,9 +52,30 @@ public class PulServiceImpl implements PulService {
                 .map(PulMapper.INSTANCE::pulInfo);
     }
 
+    private Sort mapSort(Sort sort, Map<String, String> fieldMap) {
+        List<Sort.Order> newOrders = new ArrayList<>();
+        for (Sort.Order order : sort) {
+            newOrders.add(new Sort.Order(order.getDirection(), fieldMap.get(order.getProperty())));
+        }
+        if (newOrders.isEmpty()) {
+            return Sort.unsorted();
+        } else {
+            return Sort.by(newOrders.toArray(Sort.Order[]::new));
+        }
+    }
+
+    private Pageable mapPageable(Pageable pageable) {
+        return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), mapSort(pageable.getSort(), sortFieldMap));
+    }
+
+    private Pageable mapNativePageable(Pageable pageable) {
+        return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), mapSort(pageable.getSort(), nativeSortFieldMap));
+    }
+
     @Cacheable(cacheNames = "pulInfoPage")
     @Override
     public PageData<PulInfo> queryPulByType(String pulType, Pageable pageable) {
+        pageable = mapPageable(pageable);
         Page<PulPO> pulPoPage = pulRepository.findAllByTypeIgnoreCase(pulType, pageable);
         return PageData.<PulInfo>builder()
                 .list(pulPoPage.getContent()
@@ -54,7 +91,7 @@ public class PulServiceImpl implements PulService {
     public PageData<PulInfo> queryPulByLinage(Integer taxonomyId, String assemblyAccession, String spSpecies, String spPhylum, Pageable pageable) {
         final String speciesProp = "species";
         final String otherPhylumExpress = "other";
-
+        pageable = mapPageable(pageable);
         Page<PulPO> pulPoPage = pulRepository.findAll((Specification<PulPO>) (root, criteriaQuery, criteriaBuilder) -> {
             List<Predicate> list = new ArrayList<>();
             if (Objects.nonNull(taxonomyId)) {
@@ -92,6 +129,7 @@ public class PulServiceImpl implements PulService {
     @Cacheable(cacheNames = "pulInfoPage")
     @Override
     public PageData<PulInfo> queryPulByDomainName(String domainName, Pageable pageable) {
+        pageable = mapNativePageable(pageable);
         Page<PulPO> pulPoPage = pulRepository.findAllByDomain(domainName.toLowerCase(), pageable);
         return PageData.<PulInfo>builder()
                 .list(pulPoPage.getContent()

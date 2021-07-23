@@ -29,8 +29,9 @@ public interface PulRepository extends JpaRepository<PulPO, String>, JpaSpecific
      * @return ：
      */
     @Query(value = "select * from public.pul pul " +
-            "inner join public.gene g on pul.id = g.pul_id " +
-            "where lower(g.domain\\:\\:varchar)\\:\\:varchar[] @> ARRAY[?1]\\:\\:varchar[]", nativeQuery = true)
+            "inner join public.gene gene on pul.id = gene.pul_id " +
+            "inner join public.species species on species.id = pul.gcf_id " +
+            "where lower(gene.domain\\:\\:varchar)\\:\\:varchar[] @> ARRAY[?1]\\:\\:varchar[]", nativeQuery = true)
     Page<PulPO> findAllByDomain(String domain, Pageable pageable);
 
     /**

@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.util.List;
-import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 
@@ -27,14 +27,6 @@ public class PulController {
     PulService pulService;
     @Resource
     GggeneService gggeneService;
-
-    static Map<String, String> sortFieldMap = Map.of(
-            "pul_id", "pulId",
-            "pul_type", "type",
-            "assembly_accession", "species.gcfNumber",
-            "species", "species.spSpecies",
-            "phylum", "species.spPhylum"
-    );
 
     @Data
     static class PulQuery {
@@ -64,16 +56,15 @@ public class PulController {
     @PostMapping("query")
     @ResponseBody
     public WebResponse<PageData<PulInfo>> listAll(
-            @RequestBody
-                    PulQuery query
+            @RequestBody PulQuery query
     ) {
         Pageable pageable;
-        if (!query.getSortCol().isEmpty()) {
+        if (Objects.nonNull(query.getSortCol()) && !query.getSortCol().isBlank()) {
             Sort sort;
             if ("ascending".equals(query.getSortOrder())) {
-                sort = Sort.by(sortFieldMap.get(query.getSortCol())).ascending();
+                sort = Sort.by(query.getSortCol()).ascending();
             } else {
-                sort = Sort.by(sortFieldMap.get(query.getSortCol())).descending();
+                sort = Sort.by(query.getSortCol()).descending();
             }
             pageable = PageRequest.of(query.getPageNo() - 1, query.getPageLen(), sort);
         } else {
