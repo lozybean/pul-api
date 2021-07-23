@@ -18,6 +18,8 @@ public class PulContent implements Serializable {
     private Integer geneStart;
     @JsonProperty("gene_end")
     private Integer geneEnd;
+    @JsonProperty("strand")
+    private Integer strand;
     @JsonProperty("domains")
     private List<String> domains;
 }

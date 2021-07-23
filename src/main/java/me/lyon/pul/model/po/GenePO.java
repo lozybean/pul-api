@@ -39,6 +39,8 @@ public class GenePO implements Serializable {
     private Integer locusStart;
     @Column(name = "locus_end")
     private Integer locusEnd;
+    @Column(name = "strand")
+    private Integer strand;
     @Column(name = "score")
     private Double score;
 }

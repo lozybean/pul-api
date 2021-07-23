@@ -29,6 +29,7 @@ public class GggeneServiceImpl implements GggeneService {
                 .toArray(String[]::new);
         int[] starts = pulInfo.getContent().stream().map(PulContent::getGeneStart).mapToInt(i -> i).toArray();
         int[] ends = pulInfo.getContent().stream().map(PulContent::getGeneEnd).mapToInt(i -> i).toArray();
+        int[] strand = pulInfo.getContent().stream().map(PulContent::getStrand).mapToInt(i -> i).toArray();
 
         String[] molecule = new String[ends.length];
         Arrays.fill(molecule, pulInfo.getContigName());
@@ -37,8 +38,10 @@ public class GggeneServiceImpl implements GggeneService {
         rConnection.assign("gene", geneName);
         rConnection.assign("start", starts);
         rConnection.assign("end", ends);
-        rConnection.eval("data <- data.frame( list(molecule=molecule, gene=gene, start=start, end=end) )");
-        rConnection.eval(String.format("gg <- ggplot(data, aes(xmin = start, xmax = end, y = molecule, fill = gene, label = gene)) +\n" +
+        rConnection.assign("strand", strand);
+        rConnection.eval("data <- data.frame( list(molecule=molecule, gene=gene, start=start, end=end, strand=strand) )");
+        rConnection.eval(String.format("gg <- ggplot(data, " +
+                        "  aes(xmin = start, xmax = end, y = molecule, fill = gene, label = gene, forward = strand)) +\n" +
                         "  geom_gene_arrow(arrowhead_height = unit(3, \"mm\"), arrowhead_width = unit(1, \"mm\")) +\n" +
                         "  annotate(\"text\",x=%d,y=1.4,label=\"%s\",hjust=0.1) +\n" +
                         "  annotate(\"curve\",x=%d,y=1.3, xend = %d, yend = 1.05, curvature = 0, arrow = arrow(length = unit(2, \"mm\"))) +" +

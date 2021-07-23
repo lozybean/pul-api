@@ -34,5 +34,6 @@ public interface PulMapper {
     @Mapping(target = "geneStart", source = "locusStart")
     @Mapping(target = "geneEnd", source = "locusEnd")
     @Mapping(target = "domains", source = "domain")
+    @Mapping(target = "strand", source = "strand")
     PulContent pulContent(GenePO po);
 }
