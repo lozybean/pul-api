@@ -13,6 +13,7 @@ import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
 import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Predicate;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -32,7 +33,7 @@ public class PulServiceImpl implements PulService {
 
     @Override
     public PageData<PulInfo> queryPulByType(String pulType, Pageable pageable) {
-        Page<PulPO> pulPoPage = pulRepository.findAllByType(pulType, pageable);
+        Page<PulPO> pulPoPage = pulRepository.findAllByTypeIgnoreCase(pulType, pageable);
         return PageData.<PulInfo>builder()
                 .list(pulPoPage.getContent()
                         .stream()
@@ -53,10 +54,12 @@ public class PulServiceImpl implements PulService {
                 list.add(criteriaBuilder.equal(root.get(speciesProp).get("taxid").as(Integer.class), taxonomyId));
             }
             if (!StringUtils.isEmpty(assemblyAccession)) {
-                list.add(criteriaBuilder.equal(root.get(speciesProp).get("gcfNumber").as(String.class), assemblyAccession));
+                Expression<String> lower = criteriaBuilder.lower(root.get(speciesProp).get("gcfNumber").as(String.class));
+                list.add(criteriaBuilder.equal(lower, assemblyAccession.toLowerCase()));
             }
             if (!StringUtils.isEmpty(spSpecies)) {
-                list.add(criteriaBuilder.equal(root.get(speciesProp).get("spSpecies").as(String.class), spSpecies));
+                Expression<String> lower = criteriaBuilder.lower(root.get(speciesProp).get("spSpecies").as(String.class));
+                list.add(criteriaBuilder.equal(lower, spSpecies.toLowerCase()));
             }
             if (!StringUtils.isEmpty(spPhylum)) {
                 if (otherPhylumExpress.equals(spPhylum)) {
@@ -64,7 +67,8 @@ public class PulServiceImpl implements PulService {
                     MAIN_PHYLUM_LIST.forEach(in::value);
                     list.add(criteriaBuilder.not(in));
                 } else {
-                    list.add(criteriaBuilder.equal(root.get(speciesProp).get("spPhylum").as(String.class), spPhylum));
+                    Expression<String> lower = criteriaBuilder.lower(root.get(speciesProp).get("spPhylum").as(String.class));
+                    list.add(criteriaBuilder.equal(lower, spPhylum.toLowerCase()));
                 }
             }
             return criteriaBuilder.and(list.toArray(new Predicate[0]));
@@ -80,7 +84,7 @@ public class PulServiceImpl implements PulService {
 
     @Override
     public PageData<PulInfo> queryPulByDomainName(String domainName, Pageable pageable) {
-        Page<PulPO> pulPoPage = pulRepository.findAllByDomain(domainName, pageable);
+        Page<PulPO> pulPoPage = pulRepository.findAllByDomain(domainName.toLowerCase(), pageable);
         return PageData.<PulInfo>builder()
                 .list(pulPoPage.getContent()
                         .stream()

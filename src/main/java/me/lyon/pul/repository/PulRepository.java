@@ -7,7 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 
-import java.util.Optional;
 
 public interface PulRepository extends JpaRepository<PulPO, String>, JpaSpecificationExecutor<PulPO> {
     /**
@@ -17,7 +16,7 @@ public interface PulRepository extends JpaRepository<PulPO, String>, JpaSpecific
      * @param pageable : 分页信息
      * @return :
      */
-    Page<PulPO> findAllByType(String type, Pageable pageable);
+    Page<PulPO> findAllByTypeIgnoreCase(String type, Pageable pageable);
 
     /**
      * 通过 gene.domain 检索
@@ -28,6 +27,6 @@ public interface PulRepository extends JpaRepository<PulPO, String>, JpaSpecific
      */
     @Query(value = "select * from public.pul pul " +
             "inner join public.gene g on pul.id = g.pul_id " +
-            "where g.domain @> ARRAY[?1]\\:\\:varchar[]", nativeQuery = true)
+            "where lower(g.domain\\:\\:varchar)\\:\\:varchar[] @> ARRAY[?1]\\:\\:varchar[]", nativeQuery = true)
     Page<PulPO> findAllByDomain(String domain, Pageable pageable);
 }
