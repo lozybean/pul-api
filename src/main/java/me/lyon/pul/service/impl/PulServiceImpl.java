@@ -49,7 +49,11 @@ public class PulServiceImpl implements PulService {
     @Override
     public Optional<PulInfo> queryById(String id) {
         return pulRepository.findById(id)
-                .map(PulMapper.INSTANCE::pulInfo);
+                .map(PulMapper.INSTANCE::pulInfo)
+                .map(pul -> {
+                    pul.setContent(pul.getContent().stream().sorted().collect(Collectors.toList()));
+                    return pul;
+                });
     }
 
     private Sort mapSort(Sort sort, Map<String, String> fieldMap) {

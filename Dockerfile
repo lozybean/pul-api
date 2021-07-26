@@ -1,7 +1,7 @@
 FROM adoptopenjdk/openjdk11:alpine
 USER root
 
-ENV JAVA_HEAP_OPTS="-Xms4g -Xmx8g"
+ENV JAVA_HEAP_OPTS="-Xms1g -Xmx2g"
 ENV JAVA_OPTS=""
 
 RUN echo -e "https://mirrors.aliyun.com/alpine/latest-stable/main\nhttps://mirrors.aliyun.com/alpine/latest-stable/community" >/etc/apk/repositories \

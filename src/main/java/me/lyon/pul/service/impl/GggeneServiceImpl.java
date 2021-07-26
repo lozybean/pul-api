@@ -12,6 +12,8 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @CacheConfig(cacheNames = {"gggenes"})
@@ -23,13 +25,16 @@ public class GggeneServiceImpl implements GggeneService {
     @Cacheable(cacheNames = "ggenes", key = "#pulInfo.id")
     @Override
     public synchronized String plotWithBase64(PulInfo pulInfo) throws REngineException, REXPMismatchException {
-        String[] geneName = pulInfo.getContent()
+        List<PulContent> pulContents = pulInfo.getContent().stream().sorted().collect(Collectors.toList());
+        String[] geneName = pulContents
                 .stream()
                 .map(PulContent::getGeneId)
                 .toArray(String[]::new);
-        int[] starts = pulInfo.getContent().stream().map(PulContent::getGeneStart).mapToInt(i -> i).toArray();
-        int[] ends = pulInfo.getContent().stream().map(PulContent::getGeneEnd).mapToInt(i -> i).toArray();
-        int[] strand = pulInfo.getContent().stream().map(PulContent::getStrand).mapToInt(i -> i).toArray();
+        int[] starts = pulContents.stream().map(PulContent::getGeneStart).mapToInt(i -> i).toArray();
+        int[] ends = pulContents.stream().map(PulContent::getGeneEnd).mapToInt(i -> i).toArray();
+        int[] strand = pulContents.stream().map(PulContent::getStrand).mapToInt(i -> i).toArray();
+        int arrowStart = Math.min(starts[0], ends[0]);
+        int arrowEnd = Math.max(ends[ends.length - 1], starts[starts.length - 1]);
 
         String[] molecule = new String[ends.length];
         Arrays.fill(molecule, pulInfo.getContigName());
@@ -51,10 +56,10 @@ public class GggeneServiceImpl implements GggeneService {
                         "  discrete_scale(\"fill\", \"manual\", palette_Set3) +\n" +
                         "  theme_genes() +\n" +
                         "  theme(legend.position=\"none\")",
-                starts[0], geneName[0],
-                starts[0], starts[0],
-                ends[ends.length - 1], geneName[geneName.length - 1],
-                ends[ends.length - 1], ends[ends.length - 1]
+                arrowStart, geneName[0],
+                arrowStart, arrowStart,
+                arrowEnd, geneName[geneName.length - 1],
+                arrowEnd, arrowEnd
                 )
         );
 
