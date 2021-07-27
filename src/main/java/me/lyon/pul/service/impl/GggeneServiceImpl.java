@@ -1,5 +1,6 @@
 package me.lyon.pul.service.impl;
 
+import lombok.extern.slf4j.Slf4j;
 import me.lyon.pul.model.vo.PulContent;
 import me.lyon.pul.model.vo.PulInfo;
 import me.lyon.pul.service.GggeneService;
@@ -15,6 +16,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @CacheConfig(cacheNames = {"gggenes"})
 public class GggeneServiceImpl implements GggeneService {
@@ -25,6 +27,7 @@ public class GggeneServiceImpl implements GggeneService {
     @Cacheable(cacheNames = "ggenes", key = "#pulInfo.id")
     @Override
     public synchronized String plotWithBase64(PulInfo pulInfo) throws REngineException, REXPMismatchException {
+        String speciesName = pulInfo.getSpSpecies();
         List<PulContent> pulContents = pulInfo.getContent().stream().sorted().collect(Collectors.toList());
         String[] geneName = pulContents
                 .stream()
@@ -35,6 +38,7 @@ public class GggeneServiceImpl implements GggeneService {
         int[] strand = pulContents.stream().map(PulContent::getStrand).mapToInt(i -> i).toArray();
         int arrowStart = Math.min(starts[0], ends[0]);
         int arrowEnd = Math.max(ends[ends.length - 1], starts[starts.length - 1]);
+        String[] classification = pulContents.stream().map(PulContent::getGeneType).toArray(String[]::new);
 
         String[] molecule = new String[ends.length];
         Arrays.fill(molecule, pulInfo.getContigName());
@@ -44,24 +48,28 @@ public class GggeneServiceImpl implements GggeneService {
         rConnection.assign("start", starts);
         rConnection.assign("end", ends);
         rConnection.assign("strand", strand);
-        rConnection.eval("data <- data.frame( list(molecule=molecule, gene=gene, start=start, end=end, strand=strand) )");
-        rConnection.eval(String.format("gg <- ggplot(data, " +
-                        "  aes(xmin = start, xmax = end, y = molecule, fill = gene, label = gene, forward = strand)) +\n" +
+        rConnection.assign("classification", classification);
+        rConnection.eval("data <- data.frame( list(molecule=molecule, gene=gene, start=start, end=end, strand=strand, classification=classification) )");
+        String gggenesCmd = String.format("gg <- ggplot(data, " +
+                        "  aes(xmin = start, xmax = end, y = molecule, fill = classification, label = gene, forward = strand)) +\n" +
                         "  geom_gene_arrow(arrowhead_height = unit(3, \"mm\"), arrowhead_width = unit(1, \"mm\")) +\n" +
                         "  annotate(\"text\",x=%d,y=1.4,label=\"%s\",hjust=0.1) +\n" +
                         "  annotate(\"curve\",x=%d,y=1.3, xend = %d, yend = 1.05, curvature = 0, arrow = arrow(length = unit(2, \"mm\"))) +" +
                         "  annotate(\"text\",x=%d,y=1.4,label=\"%s\",hjust=0.9) +\n" +
                         "  annotate(\"curve\",x=%d,y=1.3, xend = %d, yend = 1.05, curvature = 0, arrow = arrow(length = unit(2, \"mm\"))) +" +
                         "  facet_wrap(~ molecule, scales = \"free\", ncol = 1) +\n" +
-                        "  discrete_scale(\"fill\", \"manual\", palette_Set3) +\n" +
+                        "  scale_fill_manual(values=myColors) +\n" +
                         "  theme_genes() +\n" +
-                        "  theme(legend.position=\"none\")",
+                        "  theme(legend.position=\"none\", axis.title.y=element_blank()) +\n" +
+                        "  xlab(\"%s\")",
                 arrowStart, geneName[0],
                 arrowStart, arrowStart,
                 arrowEnd, geneName[geneName.length - 1],
-                arrowEnd, arrowEnd
-                )
+                arrowEnd, arrowEnd,
+                speciesName
         );
+        log.info("gggenes command: \n{}", gggenesCmd);
+        rConnection.eval(gggenesCmd);
 
         return rConnection.eval("encodeGraphic(gg)").asString();
     }
