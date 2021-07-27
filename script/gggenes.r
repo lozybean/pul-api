@@ -12,7 +12,7 @@ encodeGraphic <- function(g) {
   return(img)
 }
 myColors <- c("UNKNOWN"="#A6CEE3","MME"="#1F78B4","TF"="#B2DF8A",
-              "carbonhydrate associating enzymes"="#33A02C",
+              "carbonhydrate active enzymes"="#33A02C",
               "sugar transporter or sugar binding protein"="#FB9A99")
 sub_genes = subset(example_genes, molecule=="Genome5")
 sub_genes$cls <- c("TF", "TF", "UNKNOWN", "MME", "MME", "carbonhydrate associating enzymes", "carbonhydrate associating enzymes", "sugar transporter or sugar binding protein", "TF", "UNKNOWN")

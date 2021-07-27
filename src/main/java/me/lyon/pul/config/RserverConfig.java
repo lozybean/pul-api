@@ -29,7 +29,7 @@ public class RserverConfig {
                 "}");
         rConnection.eval("palette_Set3 <- colorRampPalette(brewer.pal(12, \"Set3\"))");
         rConnection.eval("myColors <- c(\"UNKNOWN\"=\"#A6CEE3\",\"MME\"=\"#1F78B4\",\"TF\"=\"#B2DF8A\",\n" +
-                "  \"carbonhydrate associating enzymes\"=\"#33A02C\",\n" +
+                "  \"carbonhydrate active enzymes\"=\"#33A02C\",\n" +
                 "  \"sugar transporter or sugar binding protein\"=\"#FB9A99\")");
         return rConnection;
     }
