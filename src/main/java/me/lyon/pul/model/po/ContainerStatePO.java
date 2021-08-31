@@ -1,13 +1,11 @@
 package me.lyon.pul.model.po;
 
 import lombok.*;
+import me.lyon.pul.constant.ContainerStatus;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.Immutable;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.util.Objects;
 
 @Entity
@@ -23,8 +21,9 @@ public class ContainerStatePO {
     @Id
     @Column(name = "id")
     private String id;
+    @Enumerated(EnumType.STRING)
     @Column(name = "status")
-    private String status;
+    private ContainerStatus status;
     @Column(name = "running")
     private Boolean running;
     @Column(name = "paused")
@@ -45,6 +44,12 @@ public class ContainerStatePO {
     private String startedAt;
     @Column(name = "finishedat")
     private String finishedAt;
+
+    public static ContainerStatePO ofId(String containerId) {
+        return ContainerStatePO.builder()
+                .id(containerId)
+                .build();
+    }
 
     @Override
     public boolean equals(Object o) {

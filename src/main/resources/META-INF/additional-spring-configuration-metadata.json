@@ -9,6 +9,36 @@
       "name": "rserver.port",
       "type": "java.lang.String",
       "description": "Description for rserver.port."
+    },
+    {
+      "name": "predict.docker-image",
+      "type": "java.lang.String",
+      "description": "docker image of pul predicate."
+    },
+    {
+      "name": "predict.docker-cpu",
+      "type": "java.lang.String",
+      "description": "cpu count for pul predicate container."
+    },
+    {
+      "name": "predict.docker-memory",
+      "type": "java.lang.String",
+      "description": "memory bytes for pul predicate container."
+    },
+    {
+      "name": "predict.reference-path",
+      "type": "java.lang.String",
+      "description": "reference path for pul predicate."
+    },
+    {
+      "name": "predict.input-path",
+      "type": "java.lang.String",
+      "description": "input path for pul predicate, input files will be create under this path."
+    },
+    {
+      "name": "predict.output-path",
+      "type": "java.lang.String",
+      "description": "output path for pul predicate, output files will be create under this path."
     }
   ]
 }

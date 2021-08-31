@@ -156,6 +156,13 @@
             <version>${docker.java.version}</version>
         </dependency>
 
+        <!-- commons -->
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.6</version>
+        </dependency>
+
         <!-- map struct -->
         <dependency>
             <groupId>org.mapstruct</groupId>

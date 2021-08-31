@@ -31,3 +31,11 @@ server:
 rserver:
   host: '127.0.0.1'
   port: 6311
+
+predict:
+  docker-image: 'pul-predict:1.0.0'
+  docker-cpu: 1
+  docker-memory: 100000000
+  reference-path: "/Volumes/portable/me/pul/predict"
+  input-path: "/Volumes/portable/me/pul/predict/test_input"
+  output-path: "/Volumes/portable/me/pul/predict/test_output"

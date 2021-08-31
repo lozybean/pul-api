@@ -2,6 +2,7 @@ package me.lyon.pul.constant;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.util.Map;
 import java.util.function.Function;
@@ -24,7 +25,7 @@ public enum ContainerStatus {
             .of(ContainerStatus.values())
             .collect(Collectors.toMap(ContainerStatus::getValue, Function.identity()));
 
-    public ContainerStatus ofValue(String value) {
+    public static ContainerStatus ofValue(String value) {
         return VALUE_MAP.getOrDefault(value, null);
     }
 }

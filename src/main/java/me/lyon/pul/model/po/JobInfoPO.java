@@ -20,11 +20,12 @@ import java.util.Objects;
 @AllArgsConstructor
 public class JobInfoPO {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Integer id;
     @Column(name = "token")
     private String token;
-    @OneToOne(fetch = FetchType.EAGER)
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "container_id", referencedColumnName = "id")
     private ContainerStatePO containerState;
     @Enumerated(EnumType.STRING)
