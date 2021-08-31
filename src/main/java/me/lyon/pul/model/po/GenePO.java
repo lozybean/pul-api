@@ -2,6 +2,7 @@ package me.lyon.pul.model.po;
 
 import com.vladmihalcea.hibernate.type.array.ListArrayType;
 import lombok.*;
+import org.hibernate.Hibernate;
 import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
@@ -9,6 +10,7 @@ import org.hibernate.annotations.TypeDef;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Immutable
@@ -17,9 +19,11 @@ import java.util.List;
         name = "string-array",
         typeClass = ListArrayType.class
 )
-@Data
+@Getter
+@Setter
+@ToString
+@RequiredArgsConstructor
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
 public class GenePO implements Serializable {
     @Id
@@ -43,4 +47,18 @@ public class GenePO implements Serializable {
     private Integer strand;
     @Column(name = "score")
     private Double score;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+        GenePO genePO = (GenePO) o;
+
+        return Objects.equals(id, genePO.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return 467108209;
+    }
 }

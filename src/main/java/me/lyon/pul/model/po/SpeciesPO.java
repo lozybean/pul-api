@@ -1,9 +1,7 @@
 package me.lyon.pul.model.po;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import org.hibernate.Hibernate;
 import org.hibernate.annotations.Immutable;
 
 import javax.persistence.Column;
@@ -11,13 +9,16 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import java.io.Serializable;
+import java.util.Objects;
 
 @Entity
 @Immutable
 @Table(name = "species")
-@Data
+@Getter
+@Setter
+@ToString
+@RequiredArgsConstructor
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
 public class SpeciesPO implements Serializable {
     @Id
@@ -45,4 +46,18 @@ public class SpeciesPO implements Serializable {
     private String assembleLevel;
     @Column(name = "phyla_information")
     private String phylaInformation;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+        SpeciesPO speciesPO = (SpeciesPO) o;
+
+        return Objects.equals(id, speciesPO.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return 2137681347;
+    }
 }

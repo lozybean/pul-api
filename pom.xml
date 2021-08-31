@@ -24,6 +24,7 @@
         <mapstruct.version>1.4.1.Final</mapstruct.version>
         <powermock.version>2.0.7</powermock.version>
         <mockito.version>3.9.0</mockito.version>
+        <docker.java.version>3.2.11</docker.java.version>
     </properties>
 
     <dependencies>
@@ -136,6 +137,23 @@
             <groupId>com.fasterxml.jackson.dataformat</groupId>
             <artifactId>jackson-dataformat-csv</artifactId>
             <version>${jackson.version}</version>
+        </dependency>
+
+        <!-- docker client -->
+        <dependency>
+            <groupId>com.github.docker-java</groupId>
+            <artifactId>docker-java</artifactId>
+            <version>${docker.java.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.docker-java</groupId>
+            <artifactId>docker-java-core</artifactId>
+            <version>${docker.java.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.docker-java</groupId>
+            <artifactId>docker-java-transport-httpclient5</artifactId>
+            <version>${docker.java.version}</version>
         </dependency>
 
         <!-- map struct -->

@@ -1,18 +1,22 @@
 package me.lyon.pul.model.po;
 
 import lombok.*;
+import org.hibernate.Hibernate;
 import org.hibernate.annotations.Immutable;
 
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Immutable
 @Table(name = "pul")
-@Data
+@Getter
+@Setter
+@ToString
+@RequiredArgsConstructor
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
 public class PulPO implements Serializable {
     @Id
@@ -35,4 +39,18 @@ public class PulPO implements Serializable {
     @OneToMany(mappedBy = "pul",
             cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<GenePO> contents;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+        PulPO pulPO = (PulPO) o;
+
+        return Objects.equals(id, pulPO.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return 257861719;
+    }
 }
