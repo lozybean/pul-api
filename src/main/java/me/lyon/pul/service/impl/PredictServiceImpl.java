@@ -27,6 +27,8 @@ import me.lyon.pul.service.PredictService;
 import me.lyon.pul.util.TokenUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -43,6 +45,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
+@CacheConfig(cacheNames = {"predictResult"})
 public class PredictServiceImpl implements PredictService {
     @Resource(name = "predictConfig")
     PredictConfig config;
@@ -277,6 +280,7 @@ public class PredictServiceImpl implements PredictService {
         }
     }
 
+    @Cacheable(cacheNames = "predictResult", key = "#token")
     @Override
     public List<PulInfo> readPredictResult(String token) {
         Path pulInfoResult = Path.of(config.getOutputPath(), "PUL_information");

@@ -1,9 +1,7 @@
 package me.lyon.pul.controller;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.lyon.pul.model.entity.*;
 import me.lyon.pul.service.GggeneService;
@@ -14,7 +12,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
-import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -103,12 +100,6 @@ public class PulController {
         }
     }
 
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    static class Gggenes implements Serializable {
-        private String base64;
-    }
 
     @GetMapping("{id}/gggenes")
     @ResponseBody
@@ -118,8 +109,8 @@ public class PulController {
         Optional<PulInfo> pulInfo = pulService.queryById(id);
         if (pulInfo.isPresent()) {
             try {
-                String base64 = gggeneService.plotWithBase64(pulInfo.get());
-                return WebResponse.ok(new Gggenes(base64));
+                Gggenes gggenes = gggeneService.plotWithBase64(pulInfo.get());
+                return WebResponse.ok(gggenes);
             } catch (Exception e) {
                 log.warn("Ggenes绘制失败！{}", pulInfo.get().getPulId(), e);
                 return WebResponse.warn("Gggenes绘制失败，请检查！");

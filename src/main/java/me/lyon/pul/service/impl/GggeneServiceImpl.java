@@ -1,6 +1,7 @@
 package me.lyon.pul.service.impl;
 
 import lombok.extern.slf4j.Slf4j;
+import me.lyon.pul.model.entity.Gggenes;
 import me.lyon.pul.model.entity.PulContent;
 import me.lyon.pul.model.entity.PulInfo;
 import me.lyon.pul.service.GggeneService;
@@ -23,10 +24,7 @@ public class GggeneServiceImpl implements GggeneService {
     @Resource(name = "rConnection")
     RConnection rConnection;
 
-
-    @Cacheable(cacheNames = "ggenes", key = "#pulInfo.id")
-    @Override
-    public synchronized String plotWithBase64(PulInfo pulInfo) throws REngineException, REXPMismatchException {
+    private synchronized String plotByRConnection(PulInfo pulInfo) throws REngineException, REXPMismatchException {
         String speciesName = pulInfo.getSpSpecies();
         List<PulContent> pulContents = pulInfo.getContent().stream().sorted().collect(Collectors.toList());
         String[] geneName = pulContents
@@ -72,5 +70,17 @@ public class GggeneServiceImpl implements GggeneService {
         rConnection.eval(gggenesCmd);
 
         return rConnection.eval("encodeGraphic(gg)").asString();
+    }
+
+    @Cacheable(cacheNames = "ggenes", key = "#pulInfo.id")
+    @Override
+    public Gggenes plotWithBase64(PulInfo pulInfo) throws REngineException, REXPMismatchException {
+        return new Gggenes(plotByRConnection(pulInfo));
+    }
+
+    @Cacheable(cacheNames = "ggenes", key = "#token.concat('-').concat(#pulInfo.id)")
+    @Override
+    public Gggenes plotWithBase64WithToken(PulInfo pulInfo, String token) throws REngineException, REXPMismatchException {
+        return new Gggenes(plotByRConnection(pulInfo));
     }
 }

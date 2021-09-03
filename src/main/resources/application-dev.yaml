@@ -4,7 +4,7 @@ spring:
   cache:
     type: redis
     redis:
-      time-to-live: "P30D"
+      time-to-live: "P1D"
   jackson:
     time-zone: GMT+8
     date-format: yyyy-MM-dd HH:mm:ss
