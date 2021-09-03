@@ -148,7 +148,7 @@ public class PredictServiceImpl implements PredictService {
     @CachePut(cacheNames = "predictJob", key = "#token")
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public JobInfo waitPredictFinish(String token) {
+    public JobInfo waitPredictJobFinish(String token) {
         JobInfo jobInfo = findByToken(token);
         if (!JobStatus.RUNNING.equals(jobInfo.getStatus())) {
             log.warn("job not in RUNNING status: {}", token);

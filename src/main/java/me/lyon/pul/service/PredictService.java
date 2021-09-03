@@ -45,7 +45,7 @@ public interface PredictService {
      * @param token : token
      * @return : job info
      */
-    JobInfo waitPredictFinish(String token);
+    JobInfo waitPredictJobFinish(String token);
 
     /**
      * update predict job status

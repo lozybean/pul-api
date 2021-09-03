@@ -26,6 +26,6 @@ public class PredictJob {
         String token = jobInfo.getToken();
         log.info("find init job to run: {}, token: {}", jobInfo.getId(), token);
         predictService.startPredictJob(token);
-        predictService.waitPredictFinish(token);
+        predictService.waitPredictJobFinish(token);
     }
 }
