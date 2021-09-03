@@ -25,15 +25,19 @@ import me.lyon.pul.repository.JobInfoRepository;
 import me.lyon.pul.repository.SpeciesRepository;
 import me.lyon.pul.service.PredictService;
 import me.lyon.pul.util.TokenUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
@@ -45,7 +49,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
-@CacheConfig(cacheNames = {"predictResult"})
+@CacheConfig(cacheNames = {"predictJob", "predictResult"})
 public class PredictServiceImpl implements PredictService {
     @Resource(name = "predictConfig")
     PredictConfig config;
@@ -81,6 +85,7 @@ public class PredictServiceImpl implements PredictService {
                 .map(JobInfoMapper.INSTANCE::entity);
     }
 
+    @Cacheable(cacheNames = "predictJob", key = "#token")
     @Override
     public JobInfo findByToken(String token) {
         return repository.findByToken(token)
@@ -90,7 +95,7 @@ public class PredictServiceImpl implements PredictService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public JobInfo createPulPredictContainer(MultipartFile file) {
+    public JobInfo createPredictJob(MultipartFile file) {
         String token = TokenUtils.generateNewToken();
         Path outputPath = createOutputDir(token);
         Path inputFile = createInputFile(token, file);
@@ -124,43 +129,57 @@ public class PredictServiceImpl implements PredictService {
         }
     }
 
+    @CachePut(cacheNames = "predictJob", key = "#token")
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public void startContainer(String id) {
-        try (StartContainerCmd cmd = dockerClient.startContainerCmd(id)) {
+    public JobInfo startPredictJob(String token) {
+        JobInfo jobInfo = findByToken(token);
+        if (!JobStatus.INIT.equals(jobInfo.getStatus())) {
+            log.warn("job not in INIT status: {}", token);
+            return jobInfo;
+        }
+        String containerId = jobInfo.getContainerState().getId();
+        try (StartContainerCmd cmd = dockerClient.startContainerCmd(containerId)) {
             cmd.exec();
         }
-        inspectContainer(id, true);
+        return updatePredictJobStatus(token);
     }
 
+    @CachePut(cacheNames = "predictJob", key = "#token")
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public void waitContainer(String id) {
-        try (WaitContainerCmd cmd = dockerClient.waitContainerCmd(id)) {
+    public JobInfo waitPredictFinish(String token) {
+        JobInfo jobInfo = findByToken(token);
+        if (!JobStatus.RUNNING.equals(jobInfo.getStatus())) {
+            log.warn("job not in RUNNING status: {}", token);
+            return jobInfo;
+        }
+        String containerId = jobInfo.getContainerState().getId();
+        try (WaitContainerCmd cmd = dockerClient.waitContainerCmd(containerId)) {
             WaitContainerResultCallback callback = cmd.start();
             callback.awaitStatusCode();
         }
-        inspectContainer(id, true);
+        return updatePredictJobStatus(token);
     }
 
+    @CachePut(cacheNames = "predictJob", key = "#token")
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public ContainerState inspectContainer(String id, boolean update) {
+    public JobInfo updatePredictJobStatus(String token) {
+        JobInfo jobInfo = findByToken(token);
+        String containerId = jobInfo.getContainerState().getId();
+        ContainerState containerState = inspectContainer(containerId);
+        ContainerStatePO containerStatePO = JobInfoMapper.INSTANCE.po(containerState);
+        JobInfoPO po = JobInfoMapper.INSTANCE.po(jobInfo);
+        po.setStatus(JobStatus.fromContainerState(containerStatePO));
+        po.setContainerState(containerStatePO);
+        po.setUpdateTime(new Date());
+        return JobInfoMapper.INSTANCE.entity(repository.save(po));
+    }
+
+    private ContainerState inspectContainer(String id) {
         try (InspectContainerCmd cmd = dockerClient.inspectContainerCmd(id)) {
             InspectContainerResponse response = cmd.exec();
-
-            if (update) {
-                ContainerStatePO statePO = JobInfoMapper.INSTANCE.po(id, response.getState());
-                JobInfoPO po = repository.findByContainerState(statePO)
-                        .orElseThrow(() -> new NotFoundException("can not find related job of container: " + id));
-                po.setStatus(JobStatus.fromContainerState(statePO));
-                po.setContainerState(statePO);
-                po.setUpdateTime(new Date());
-                log.info("update job status: {}", po.getStatus());
-                log.info("update container status: {}", statePO.getStatus());
-                repository.save(po);
-            }
-
             return JobInfoMapper.INSTANCE.entity(id, response.getState());
         } catch (com.github.dockerjava.api.exception.NotFoundException e) {
             log.error("can not find container: {} , maybe has been removed", id);
@@ -168,10 +187,21 @@ public class PredictServiceImpl implements PredictService {
         }
     }
 
+    @CacheEvict(cacheNames = "predictJob", key = "#token")
     @Override
-    public void removeContainer(String id) {
-        try (RemoveContainerCmd cmd = dockerClient.removeContainerCmd(id)) {
+    public void cleanPredictJob(String token) {
+        JobInfo jobInfo = findByToken(token);
+        String containerId = jobInfo.getContainerState().getId();
+        try (RemoveContainerCmd cmd = dockerClient.removeContainerCmd(containerId)) {
             cmd.exec();
+            File outputDir = createOutputDir(token).toFile();
+            File inputFile = Path.of(config.getInputPath(), token + ".gbff").toFile();
+            FileUtils.deleteDirectory(outputDir);
+            FileUtils.deleteQuietly(inputFile);
+            JobInfoPO po = JobInfoMapper.INSTANCE.po(jobInfo);
+            repository.delete(po);
+        } catch (IOException e) {
+            log.warn("clean job result failed!", e);
         }
     }
 
@@ -280,6 +310,12 @@ public class PredictServiceImpl implements PredictService {
     @Cacheable(cacheNames = "predictResult", key = "#token")
     @Override
     public List<PulInfo> readPredictResult(String token) {
+        JobInfo jobInfo = findByToken(token);
+        if (!JobStatus.SUCCESS.equals(jobInfo.getStatus())) {
+            log.warn("job not success: {}", token);
+            throw new BizException("job still not success");
+        }
+
         Path pulInfoResult = Path.of(config.getOutputPath(), "PUL_information");
         Path pulContentResult = Path.of(config.getOutputPath(), "PUL_protein_information");
         if (!pulInfoResult.toFile().exists()) {

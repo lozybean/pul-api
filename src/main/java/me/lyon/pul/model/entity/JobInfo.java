@@ -1,6 +1,5 @@
 package me.lyon.pul.model.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 import me.lyon.pul.constant.JobStatus;

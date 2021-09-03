@@ -1,6 +1,5 @@
 package me.lyon.pul.service;
 
-import me.lyon.pul.model.entity.ContainerState;
 import me.lyon.pul.model.entity.JobInfo;
 import me.lyon.pul.model.entity.PulInfo;
 import org.springframework.web.multipart.MultipartFile;
@@ -25,52 +24,43 @@ public interface PredictService {
     JobInfo findByToken(String token);
 
     /**
-     * create container for pul predicate
+     * create predict job by Input Gbff file
      *
      * @param file : input gbff format file
-     * @return : token
+     * @return : job info
      */
-    JobInfo createPulPredictContainer(MultipartFile file);
+    JobInfo createPredictJob(MultipartFile file);
 
     /**
-     * start a container
+     * start predict job
      *
-     * @param id : container id
+     * @param token : token
+     * @return : job info
      */
-    void startContainer(String id);
+    JobInfo startPredictJob(String token);
 
     /**
-     * wait a container untile exit
+     * wait predict job finish
      *
-     * @param id : container id
+     * @param token : token
+     * @return : job info
      */
-    void waitContainer(String id);
+    JobInfo waitPredictFinish(String token);
 
     /**
-     * inspect docker container
+     * update predict job status
      *
-     * @param id     : container id
-     * @param update : whether update
-     * @return : container state
+     * @param token :
+     * @return : job info
      */
-    ContainerState inspectContainer(String id, boolean update);
+    JobInfo updatePredictJobStatus(String token);
 
     /**
-     * default inspect docker container, no update
+     * clean and remove predict job
      *
-     * @param id : container id
-     * @return : container state
+     * @param token :
      */
-    default ContainerState inspectContainer(String id) {
-        return inspectContainer(id, false);
-    }
-
-    /**
-     * remove container
-     *
-     * @param id :
-     */
-    void removeContainer(String id);
+    void cleanPredictJob(String token);
 
     /**
      * read predict result by token

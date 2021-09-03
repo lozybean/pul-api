@@ -40,6 +40,8 @@ public interface JobInfoMapper {
 
     ContainerStatePO po(ContainerState state);
 
+    JobInfoPO po(JobInfo entity);
+
     JobInfo entity(JobInfoPO po);
 
     ContainerState entity(ContainerStatePO po);

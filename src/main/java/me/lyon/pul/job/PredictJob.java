@@ -23,8 +23,9 @@ public class PredictJob {
             return;
         }
         JobInfo jobInfo = jobInfoOptional.get();
-        log.info("find init job to run: {}, token: {}", jobInfo.getId(), jobInfo.getToken());
-        predictService.startContainer(jobInfo.getContainerState().getId());
-        predictService.waitContainer(jobInfo.getContainerState().getId());
+        String token = jobInfo.getToken();
+        log.info("find init job to run: {}, token: {}", jobInfo.getId(), token);
+        predictService.startPredictJob(token);
+        predictService.waitPredictFinish(token);
     }
 }

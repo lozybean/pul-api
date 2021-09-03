@@ -26,7 +26,7 @@ public class PredictController {
 
     @PostMapping
     public WebResponse<JobInfo> submitPredictJob(MultipartFile file) {
-        JobInfo jobInfo = predictService.createPulPredictContainer(file);
+        JobInfo jobInfo = predictService.createPredictJob(file);
         // hidden some field
         jobInfo.setId(null);
         jobInfo.setContainerState(null);

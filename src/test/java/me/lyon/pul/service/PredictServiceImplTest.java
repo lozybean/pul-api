@@ -2,7 +2,6 @@ package me.lyon.pul.service;
 
 import me.lyon.pul.constant.ContainerStatus;
 import me.lyon.pul.constant.JobStatus;
-import me.lyon.pul.model.entity.ContainerState;
 import me.lyon.pul.model.entity.JobInfo;
 import me.lyon.pul.model.entity.PulInfo;
 import org.junit.Assert;
@@ -33,16 +32,14 @@ public class PredictServiceImplTest {
                 MediaType.MULTIPART_FORM_DATA_VALUE,
                 fileResource.getInputStream());
 
-        JobInfo jobInfo = predictService.createPulPredictContainer(file);
+        JobInfo jobInfo = predictService.createPredictJob(file);
         Assert.assertNotNull(jobInfo);
         Assert.assertEquals(JobStatus.INIT, jobInfo.getStatus());
         Assert.assertEquals(ContainerStatus.CREATED, jobInfo.getContainerState().getStatus());
 
         // remove job info
         String containerId = jobInfo.getContainerState().getId();
-        predictService.removeContainer(containerId);
-        ContainerState state = predictService.inspectContainer(containerId);
-        Assert.assertNull(state);
+        predictService.cleanPredictJob(containerId);
     }
 
     @Test
