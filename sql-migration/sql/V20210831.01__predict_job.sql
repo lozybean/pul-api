@@ -9,6 +9,7 @@ CREATE TABLE job_info
 );
 CREATE INDEX job_info_token_index ON job_info (token);
 CREATE INDEX job_info_container_id_index ON job_info (container_id);
+CREATE INDEX job_info_status_index ON job_info (status);
 
 CREATE TABLE container_state
 (
