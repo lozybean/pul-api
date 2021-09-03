@@ -199,7 +199,11 @@ public class PredictServiceImpl implements PredictService {
         String containerId = jobInfo.getContainerState().getId();
         try (RemoveContainerCmd cmd = dockerClient.removeContainerCmd(containerId)) {
             cmd.exec();
-            File outputDir = createOutputDir(token).toFile();
+        } catch (com.github.dockerjava.api.exception.NotFoundException e) {
+            log.warn("container already deleted, {}", containerId);
+        }
+        try {
+            File outputDir = Path.of(config.getOutputPath(), token).toFile();
             File inputFile = Path.of(config.getInputPath(), token + ".gbff").toFile();
             FileUtils.deleteDirectory(outputDir);
             FileUtils.deleteQuietly(inputFile);

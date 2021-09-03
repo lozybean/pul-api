@@ -44,6 +44,14 @@ public class PredictController {
         return WebResponse.ok(jobInfo);
     }
 
+    @DeleteMapping("{token}")
+    public WebResponse<Void> deleteJob(
+            @PathVariable String token
+    ) {
+        predictService.cleanPredictJob(token);
+        return WebResponse.ok(null);
+    }
+
     @GetMapping("{token}/puls")
     public WebResponse<List<PulInfo>> getPredictResult(
             @PathVariable String token
