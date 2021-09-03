@@ -13,7 +13,7 @@ spring:
     username: ${POSTGRE_USER}
     password: ${POSTGRE_PASS}
   jpa:
-    show-sql: true
+    show-sql: false
     database-platform: org.hibernate.dialect.PostgreSQLDialect
   servlet:
     multipart:

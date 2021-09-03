@@ -112,7 +112,7 @@ public class PredictServiceImpl implements PredictService {
                     .updateTime(new Date())
                     .build();
             repository.save(jobInfoPO);
-            return containerId;
+            return token;
         }
     }
 
@@ -121,9 +121,8 @@ public class PredictServiceImpl implements PredictService {
     public void startContainer(String id) {
         try (StartContainerCmd cmd = dockerClient.startContainerCmd(id)) {
             cmd.exec();
-
-            inspectContainer(id, true);
         }
+        inspectContainer(id, true);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -132,9 +131,8 @@ public class PredictServiceImpl implements PredictService {
         try (WaitContainerCmd cmd = dockerClient.waitContainerCmd(id)) {
             WaitContainerResultCallback callback = cmd.start();
             callback.awaitStatusCode();
-
-            inspectContainer(id, true);
         }
+        inspectContainer(id, true);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -149,6 +147,8 @@ public class PredictServiceImpl implements PredictService {
                         .orElseThrow(() -> new NotFoundException("can not find related job of container: " + id));
                 po.setStatus(JobStatus.fromContainerState(statePO));
                 po.setContainerState(statePO);
+                log.info("update job status: {}", po.getStatus());
+                log.info("update container status: {}", statePO.getStatus());
                 repository.save(po);
             }
 

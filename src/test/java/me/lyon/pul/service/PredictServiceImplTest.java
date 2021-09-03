@@ -31,13 +31,14 @@ public class PredictServiceImplTest {
                 MediaType.MULTIPART_FORM_DATA_VALUE,
                 fileResource.getInputStream());
 
-        String containerId = predictService.createPulPredictContainer(file);
-        Assert.assertNotNull(containerId);
-        JobInfo jobInfo = predictService.findByContainerId(containerId);
+        String token = predictService.createPulPredictContainer(file);
+        Assert.assertNotNull(token);
+        JobInfo jobInfo = predictService.findByToken(token);
         Assert.assertEquals(JobStatus.INIT, jobInfo.getStatus());
         Assert.assertEquals(ContainerStatus.CREATED, jobInfo.getContainerState().getStatus());
 
         // remove job info
+        String containerId = jobInfo.getContainerState().getId();
         predictService.removeContainer(containerId);
         ContainerState state = predictService.inspectContainer(containerId);
         Assert.assertNull(state);

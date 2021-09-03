@@ -34,7 +34,7 @@ public interface PredictService {
      * create container for pul predicate
      *
      * @param file : input gbff format file
-     * @return : container id
+     * @return : token
      */
     String createPulPredictContainer(MultipartFile file);
 
