@@ -2,9 +2,9 @@ package me.lyon.pul.service.impl;
 
 import me.lyon.pul.model.mapper.PulMapper;
 import me.lyon.pul.model.po.PulPO;
-import me.lyon.pul.model.vo.NameCount;
-import me.lyon.pul.model.vo.PageData;
-import me.lyon.pul.model.vo.PulInfo;
+import me.lyon.pul.model.entity.NameCount;
+import me.lyon.pul.model.entity.PageData;
+import me.lyon.pul.model.entity.PulInfo;
 import me.lyon.pul.repository.PulRepository;
 import me.lyon.pul.service.PulService;
 import org.springframework.cache.annotation.CacheConfig;

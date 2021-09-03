@@ -1,6 +1,6 @@
 package me.lyon.pul.service;
 
-import me.lyon.pul.model.vo.PulInfo;
+import me.lyon.pul.model.entity.PulInfo;
 import org.rosuda.REngine.REXPMismatchException;
 import org.rosuda.REngine.REngineException;
 

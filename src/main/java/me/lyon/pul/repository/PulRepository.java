@@ -1,7 +1,7 @@
 package me.lyon.pul.repository;
 
 import me.lyon.pul.model.po.PulPO;
-import me.lyon.pul.model.vo.NameCount;
+import me.lyon.pul.model.entity.NameCount;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -39,7 +39,7 @@ public interface PulRepository extends JpaRepository<PulPO, String>, JpaSpecific
      *
      * @return :
      */
-    @Query(value = "select new me.lyon.pul.model.vo.NameCount(p.type, count(p)) from PulPO p group by p.type")
+    @Query(value = "select new me.lyon.pul.model.entity.NameCount(p.type, count(p)) from PulPO p group by p.type")
     List<NameCount> countTotalPulPOSByTypeClass();
 
     /**
@@ -47,7 +47,7 @@ public interface PulRepository extends JpaRepository<PulPO, String>, JpaSpecific
      *
      * @return :
      */
-    @Query(value = "select new  me.lyon.pul.model.vo.NameCount(p.species.spPhylum, count(distinct p.id))" +
+    @Query(value = "select new  me.lyon.pul.model.entity.NameCount(p.species.spPhylum, count(distinct p.id))" +
             "from PulPO p group by p.species.spPhylum")
     List<NameCount> countTotalPulPOSBySpeciesSpPhylumClass();
 }

@@ -1,8 +1,8 @@
 package me.lyon.pul.service;
 
-import me.lyon.pul.model.vo.NameCount;
-import me.lyon.pul.model.vo.PageData;
-import me.lyon.pul.model.vo.PulInfo;
+import me.lyon.pul.model.entity.NameCount;
+import me.lyon.pul.model.entity.PageData;
+import me.lyon.pul.model.entity.PulInfo;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;

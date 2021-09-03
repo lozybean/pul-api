@@ -1,7 +1,7 @@
 package me.lyon.pul.service;
 
-import me.lyon.pul.model.vo.PageData;
-import me.lyon.pul.model.vo.PulInfo;
+import me.lyon.pul.model.entity.PageData;
+import me.lyon.pul.model.entity.PulInfo;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;

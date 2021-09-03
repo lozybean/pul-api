@@ -1,4 +1,4 @@
-package me.lyon.pul.model.vo;
+package me.lyon.pul.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
@@ -13,19 +13,19 @@ import java.io.Serializable;
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Builder
-public class WebResponse<T> implements Serializable {
+public class WebResponse<T extends Serializable> implements Serializable {
     private T data;
     private String status;
     private String msg;
 
-    public static <T> WebResponse<T> ok(T data) {
+    public static <T extends Serializable> WebResponse<T > ok(T data) {
         return WebResponse.<T>builder()
                 .data(data)
                 .status("OK")
                 .build();
     }
 
-    public static <T> WebResponse<T> warn(String message) {
+    public static <T extends Serializable> WebResponse<T> warn(String message) {
         return WebResponse.<T>builder()
                 .status("WARNING")
                 .msg(message)

@@ -2,8 +2,8 @@ package me.lyon.pul.model.mapper;
 
 import me.lyon.pul.model.po.GenePO;
 import me.lyon.pul.model.po.PulPO;
-import me.lyon.pul.model.vo.PulContent;
-import me.lyon.pul.model.vo.PulInfo;
+import me.lyon.pul.model.entity.PulContent;
+import me.lyon.pul.model.entity.PulInfo;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;

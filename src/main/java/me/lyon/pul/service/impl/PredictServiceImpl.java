@@ -9,6 +9,8 @@ import me.lyon.pul.config.PredictConfig;
 import me.lyon.pul.constant.JobStatus;
 import me.lyon.pul.exception.NotFoundException;
 import me.lyon.pul.exception.RuntimeIOException;
+import me.lyon.pul.model.entity.ContainerState;
+import me.lyon.pul.model.entity.JobInfo;
 import me.lyon.pul.model.mapper.JobInfoMapper;
 import me.lyon.pul.model.po.ContainerStatePO;
 import me.lyon.pul.model.po.JobInfoPO;
@@ -25,6 +27,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Date;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -58,14 +61,22 @@ public class PredictServiceImpl implements PredictService {
     }
 
     @Override
-    public JobInfoPO findByToken(String token) {
+    public Optional<JobInfo> findFirstInitJob() {
+        return repository.findFirstByStatusOrderByIdAsc(JobStatus.INIT)
+                .map(JobInfoMapper.INSTANCE::entity);
+    }
+
+    @Override
+    public JobInfo findByToken(String token) {
         return repository.findByToken(token)
+                .map(JobInfoMapper.INSTANCE::entity)
                 .orElseThrow(() -> new NotFoundException("can not find related job of token: {}" + token));
     }
 
     @Override
-    public JobInfoPO findByContainerId(String containerId) {
+    public JobInfo findByContainerId(String containerId) {
         return repository.findByContainerState(ContainerStatePO.ofId(containerId))
+                .map(JobInfoMapper.INSTANCE::entity)
                 .orElseThrow(() -> new NotFoundException("can not find related job of container: " + containerId));
     }
 
@@ -90,8 +101,8 @@ public class PredictServiceImpl implements PredictService {
 
             String containerId = response.getId();
 
-            InspectContainerResponse.ContainerState state = inspectContainer(containerId);
-            ContainerStatePO statePO = JobInfoMapper.INSTANCE.po(containerId, state);
+            ContainerState state = inspectContainer(containerId);
+            ContainerStatePO statePO = JobInfoMapper.INSTANCE.po(state);
 
             JobInfoPO jobInfoPO = JobInfoPO.builder()
                     .token(token)
@@ -111,27 +122,37 @@ public class PredictServiceImpl implements PredictService {
         try (StartContainerCmd cmd = dockerClient.startContainerCmd(id)) {
             cmd.exec();
 
-            InspectContainerResponse.ContainerState state = inspectContainer(id);
-            updateJobStatusByContainerState(id, state);
+            inspectContainer(id, true);
         }
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public void updateJobStatusByContainerState(String containerId, InspectContainerResponse.ContainerState state) {
-        ContainerStatePO statePO = JobInfoMapper.INSTANCE.po(containerId, state);
+    @Override
+    public void waitContainer(String id) {
+        try (WaitContainerCmd cmd = dockerClient.waitContainerCmd(id)) {
+            WaitContainerResultCallback callback = cmd.start();
+            callback.awaitStatusCode();
 
-        JobInfoPO po = findByContainerId(containerId);
-        po.setStatus(JobStatus.fromContainerState(statePO));
-        po.setContainerState(statePO);
-        repository.save(po);
+            inspectContainer(id, true);
+        }
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
-    public InspectContainerResponse.ContainerState inspectContainer(String id) {
+    public ContainerState inspectContainer(String id, boolean update) {
         try (InspectContainerCmd cmd = dockerClient.inspectContainerCmd(id)) {
             InspectContainerResponse response = cmd.exec();
 
-            return response.getState();
+            if (update) {
+                ContainerStatePO statePO = JobInfoMapper.INSTANCE.po(id, response.getState());
+                JobInfoPO po = repository.findByContainerState(statePO)
+                        .orElseThrow(() -> new NotFoundException("can not find related job of container: " + id));
+                po.setStatus(JobStatus.fromContainerState(statePO));
+                po.setContainerState(statePO);
+                repository.save(po);
+            }
+
+            return JobInfoMapper.INSTANCE.entity(id, response.getState());
         } catch (com.github.dockerjava.api.exception.NotFoundException e) {
             log.error("can not find container: {} , maybe has been removed", id);
             return null;

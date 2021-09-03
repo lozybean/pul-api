@@ -1,8 +1,8 @@
 package me.lyon.pul.service.impl;
 
 import lombok.extern.slf4j.Slf4j;
-import me.lyon.pul.model.vo.PulContent;
-import me.lyon.pul.model.vo.PulInfo;
+import me.lyon.pul.model.entity.PulContent;
+import me.lyon.pul.model.entity.PulInfo;
 import me.lyon.pul.service.GggeneService;
 import org.rosuda.REngine.REXPMismatchException;
 import org.rosuda.REngine.REngineException;

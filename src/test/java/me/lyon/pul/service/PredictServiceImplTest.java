@@ -1,9 +1,9 @@
 package me.lyon.pul.service;
 
-import com.github.dockerjava.api.command.InspectContainerResponse;
 import me.lyon.pul.constant.ContainerStatus;
 import me.lyon.pul.constant.JobStatus;
-import me.lyon.pul.model.po.JobInfoPO;
+import me.lyon.pul.model.entity.ContainerState;
+import me.lyon.pul.model.entity.JobInfo;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -15,6 +15,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import javax.annotation.Resource;
 import java.io.IOException;
+import java.util.Optional;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest
@@ -32,16 +33,20 @@ public class PredictServiceImplTest {
 
         String containerId = predictService.createPulPredictContainer(file);
         Assert.assertNotNull(containerId);
-        JobInfoPO jobInfoPO = predictService.findByContainerId(containerId);
-        Assert.assertEquals(JobStatus.INIT, jobInfoPO.getStatus());
-        Assert.assertEquals(ContainerStatus.CREATED, jobInfoPO.getContainerState().getStatus());
+        JobInfo jobInfo = predictService.findByContainerId(containerId);
+        Assert.assertEquals(JobStatus.INIT, jobInfo.getStatus());
+        Assert.assertEquals(ContainerStatus.CREATED, jobInfo.getContainerState().getStatus());
+
+        // remove job info
+        predictService.removeContainer(containerId);
+        ContainerState state = predictService.inspectContainer(containerId);
+        Assert.assertNull(state);
     }
 
     @Test
-    public void deleteContainer() {
-        final String containerId = "64f6d430936a";
-        predictService.removeContainer(containerId);
-        InspectContainerResponse.ContainerState state = predictService.inspectContainer(containerId);
-        Assert.assertNull(state);
+    public void findFirstInitJob() {
+        Optional<JobInfo> jobInfoOptional = predictService.findFirstInitJob();
+        Assert.assertTrue(jobInfoOptional.isPresent());
+        Assert.assertEquals(5, jobInfoOptional.get().getId().intValue());
     }
 }

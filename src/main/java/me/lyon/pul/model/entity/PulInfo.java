@@ -1,4 +1,4 @@
-package me.lyon.pul.model.vo;
+package me.lyon.pul.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;

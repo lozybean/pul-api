@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import me.lyon.pul.model.vo.*;
+import me.lyon.pul.model.entity.*;
 import me.lyon.pul.service.GggeneService;
 import me.lyon.pul.service.PulService;
 import org.springframework.data.domain.PageRequest;
@@ -14,6 +14,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -105,7 +106,7 @@ public class PulController {
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
-    static class Gggenes {
+    static class Gggenes implements Serializable {
         private String base64;
     }
 

@@ -1,4 +1,4 @@
-package me.lyon.pul.model.vo;
+package me.lyon.pul.model.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,7 +12,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PageData<T> implements Serializable {
+public class PageData<T extends Serializable> implements Serializable {
     private List<T> list;
     private Integer total;
 }
