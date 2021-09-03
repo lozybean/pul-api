@@ -4,6 +4,7 @@ import me.lyon.pul.constant.ContainerStatus;
 import me.lyon.pul.constant.JobStatus;
 import me.lyon.pul.model.entity.ContainerState;
 import me.lyon.pul.model.entity.JobInfo;
+import me.lyon.pul.model.entity.PulInfo;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -15,6 +16,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import javax.annotation.Resource;
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -49,5 +51,11 @@ public class PredictServiceImplTest {
         Optional<JobInfo> jobInfoOptional = predictService.findFirstInitJob();
         Assert.assertTrue(jobInfoOptional.isPresent());
         Assert.assertEquals(5, jobInfoOptional.get().getId().intValue());
+    }
+
+    @Test
+    public void readResult() {
+        List<PulInfo> pulInfoList = predictService.readPredictResult("MUt1aXRXQ09RNXNFQzJDRw");
+        System.out.println(pulInfoList);
     }
 }

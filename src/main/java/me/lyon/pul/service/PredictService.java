@@ -2,8 +2,10 @@ package me.lyon.pul.service;
 
 import me.lyon.pul.model.entity.ContainerState;
 import me.lyon.pul.model.entity.JobInfo;
+import me.lyon.pul.model.entity.PulInfo;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface PredictService {
@@ -77,4 +79,12 @@ public interface PredictService {
      * @param id :
      */
     void removeContainer(String id);
+
+    /**
+     * read predict result by token
+     *
+     * @param token :
+     * @return : predict pul result
+     */
+    List<PulInfo> readPredictResult(String token);
 }

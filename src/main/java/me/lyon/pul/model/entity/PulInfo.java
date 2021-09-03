@@ -1,12 +1,18 @@
 package me.lyon.pul.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.util.List;
 
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class PulInfo implements Serializable {
     @JsonProperty("id")
     private String id;
@@ -27,7 +33,7 @@ public class PulInfo implements Serializable {
     private String assemblyLevel;
 
     @JsonProperty("taxonomy_id")
-    private String taxonomyId;
+    private Integer taxonomyId;
     @JsonProperty("kingdom")
     private String spKingdom;
     @JsonProperty("phylum")
