@@ -30,12 +30,15 @@ public class PredictController {
         return WebResponse.ok(token);
     }
 
-    @GetMapping("{token}/status")
-    public WebResponse<JobStatus> getJobStatus(
+    @GetMapping("{token}")
+    public WebResponse<JobInfo> getJobInfo(
             @PathVariable String token
     ) {
         JobInfo jobInfo = predictService.findByToken(token);
-        return WebResponse.ok(jobInfo.getStatus());
+        // hidden some field
+        jobInfo.setId(null);
+        jobInfo.setContainerState(null);
+        return WebResponse.ok(jobInfo);
     }
 
     @GetMapping("{token}/puls")
