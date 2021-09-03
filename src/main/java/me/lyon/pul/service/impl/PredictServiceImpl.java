@@ -246,12 +246,15 @@ public class PredictServiceImpl implements PredictService {
             log.error("pul contents is empty!");
             throw new BizException("pul contents should not be empty!");
         }
+        Integer start = pulContents.get(0).getGeneStart();
+        Integer end = pulContents.get(pulContents.size() - 1).getGeneEnd();
         return PulInfo.builder()
                 .id(pulId)
+                .pulId(String.format("%s_%d_%d", contigName, start, end))
                 .pulType(pulType)
                 .contigName(contigName)
-                .pulStart(pulContents.get(0).getGeneStart())
-                .pulEnd(pulContents.get(pulContents.size() - 1).getGeneEnd())
+                .pulStart(start)
+                .pulEnd(end)
                 .assemblyAccession(species.getGcfNumber())
                 .assemblyLevel(species.getAssembleLevel())
                 .taxonomyId(species.getTaxid())
@@ -304,6 +307,6 @@ public class PredictServiceImpl implements PredictService {
         return pulInfoLines
                 .stream()
                 .map(line -> parsePulInfo(line, pulContents))
-                .collect(Collectors.toList());
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 }

@@ -38,7 +38,48 @@ public class PredictController {
         return WebResponse.ok(jobInfo.getStatus());
     }
 
-    @GetMapping("{token}/{pulId}/gggenes")
+    @GetMapping("{token}/puls")
+    public WebResponse<List<PulInfo>> getPredictResult(
+            @PathVariable String token
+    ) {
+        JobInfo jobInfo = predictService.findByToken(token);
+        if (JobStatus.INIT.equals(jobInfo.getStatus())) {
+            return WebResponse.warn("have not run yet");
+        }
+        if (JobStatus.RUNNING.equals(jobInfo.getStatus())) {
+            return WebResponse.warn("still running");
+        }
+        if (JobStatus.FAILED.equals(jobInfo.getStatus())) {
+            return WebResponse.warn(String.format("failed! %s", jobInfo.getContainerState().getError()));
+        }
+        List<PulInfo> pulInfos = predictService.readPredictResult(token);
+        return WebResponse.ok(pulInfos);
+    }
+
+    @GetMapping("{token}/puls/{pulId}")
+    public WebResponse<PulInfo> getPredictPulContent(
+            @PathVariable String token,
+            @PathVariable String pulId
+    ) {
+        JobInfo jobInfo = predictService.findByToken(token);
+        if (JobStatus.INIT.equals(jobInfo.getStatus())) {
+            return WebResponse.warn("have not run yet");
+        }
+        if (JobStatus.RUNNING.equals(jobInfo.getStatus())) {
+            return WebResponse.warn("still running");
+        }
+        if (JobStatus.FAILED.equals(jobInfo.getStatus())) {
+            return WebResponse.warn(String.format("failed! %s", jobInfo.getContainerState().getError()));
+        }
+        PulInfo pulInfo = predictService.readPredictResult(token)
+                .stream()
+                .filter(pul -> pul.getId().equals(pulId))
+                .findAny()
+                .orElseThrow(() -> new NotFoundException("no such pulId in related token result"));
+        return WebResponse.ok(pulInfo);
+    }
+
+    @GetMapping("{token}/puls/{pulId}/gggenes")
     @ResponseBody
     public WebResponse<Gggenes> plotGggenes(
             @PathVariable String token,
