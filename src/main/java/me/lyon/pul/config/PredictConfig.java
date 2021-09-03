@@ -31,7 +31,7 @@ public class PredictConfig {
         return DefaultDockerClientConfig.createDefaultConfigBuilder()
                 .withDockerHost(SOCKET_FILE)
                 .withDockerTlsVerify(false)
-                .withApiVersion("1.24")
+                .withApiVersion("1.41")
                 .build();
     }
 

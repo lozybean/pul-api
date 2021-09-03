@@ -9,6 +9,7 @@ import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
 import lombok.extern.slf4j.Slf4j;
 import me.lyon.pul.config.PredictConfig;
+import me.lyon.pul.constant.ContainerStatus;
 import me.lyon.pul.constant.JobStatus;
 import me.lyon.pul.exception.BizException;
 import me.lyon.pul.exception.NotFoundException;
@@ -139,8 +140,11 @@ public class PredictServiceImpl implements PredictService {
             return jobInfo;
         }
         String containerId = jobInfo.getContainerState().getId();
-        try (StartContainerCmd cmd = dockerClient.startContainerCmd(containerId)) {
-            cmd.exec();
+        ContainerState containerState = inspectContainer(containerId);
+        if (ContainerStatus.RUNNING != containerState.getStatus()) {
+            try (StartContainerCmd cmd = dockerClient.startContainerCmd(containerId)) {
+                cmd.exec();
+            }
         }
         return updatePredictJobStatus(token);
     }
@@ -174,7 +178,8 @@ public class PredictServiceImpl implements PredictService {
         po.setStatus(JobStatus.fromContainerState(containerStatePO));
         po.setContainerState(containerStatePO);
         po.setUpdateTime(new Date());
-        return JobInfoMapper.INSTANCE.entity(repository.save(po));
+        repository.save(po);
+        return JobInfoMapper.INSTANCE.entity(po);
     }
 
     private ContainerState inspectContainer(String id) {
@@ -183,7 +188,7 @@ public class PredictServiceImpl implements PredictService {
             return JobInfoMapper.INSTANCE.entity(id, response.getState());
         } catch (com.github.dockerjava.api.exception.NotFoundException e) {
             log.error("can not find container: {} , maybe has been removed", id);
-            return null;
+            throw new NotFoundException("no such container: " + id);
         }
     }
 
@@ -224,10 +229,8 @@ public class PredictServiceImpl implements PredictService {
 
     private List<String> parseDomains(String domainString) {
         if (StringUtils.isEmpty(domainString) || "unknown".equals(domainString)) {
-            log.warn("can not parse any domain: {}", domainString);
             return List.of();
         }
-        log.info("parse domains: {}", domainString);
         return Arrays.stream(domainString.substring(1, domainString.length() - 1)
                         .split(","))
                 .map(s -> StringUtils.strip(s, " "))
