@@ -3,14 +3,12 @@ package me.lyon.pul.model.po;
 import lombok.*;
 import me.lyon.pul.constant.JobStatus;
 import org.hibernate.Hibernate;
-import org.hibernate.annotations.Immutable;
 
 import javax.persistence.*;
 import java.util.Date;
 import java.util.Objects;
 
 @Entity
-@Immutable
 @Table(name = "job_info")
 @Getter
 @Setter

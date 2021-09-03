@@ -3,13 +3,11 @@ package me.lyon.pul.model.po;
 import lombok.*;
 import me.lyon.pul.constant.ContainerStatus;
 import org.hibernate.Hibernate;
-import org.hibernate.annotations.Immutable;
 
 import javax.persistence.*;
 import java.util.Objects;
 
 @Entity
-@Immutable
 @Table(name = "container_state")
 @Getter
 @Setter
