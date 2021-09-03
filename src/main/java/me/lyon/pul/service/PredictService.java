@@ -25,20 +25,12 @@ public interface PredictService {
     JobInfo findByToken(String token);
 
     /**
-     * find job info by container id
-     *
-     * @param containerId :
-     * @return :
-     */
-    JobInfo findByContainerId(String containerId);
-
-    /**
      * create container for pul predicate
      *
      * @param file : input gbff format file
      * @return : token
      */
-    String createPulPredictContainer(MultipartFile file);
+    JobInfo createPulPredictContainer(MultipartFile file);
 
     /**
      * start a container

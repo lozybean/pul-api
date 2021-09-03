@@ -53,8 +53,6 @@ public class PredictServiceImpl implements PredictService {
     DockerClient dockerClient;
     @Resource
     JobInfoRepository repository;
-    @Resource
-    SpeciesRepository speciesRepository;
 
     private Path createOutputDir(String token) {
         Path outputDir = Path.of(config.getOutputPath(), token);
@@ -90,16 +88,9 @@ public class PredictServiceImpl implements PredictService {
                 .orElseThrow(() -> new NotFoundException("can not find related job of token: {}" + token));
     }
 
-    @Override
-    public JobInfo findByContainerId(String containerId) {
-        return repository.findByContainerState(ContainerStatePO.ofId(containerId))
-                .map(JobInfoMapper.INSTANCE::entity)
-                .orElseThrow(() -> new NotFoundException("can not find related job of container: " + containerId));
-    }
-
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public String createPulPredictContainer(MultipartFile file) {
+    public JobInfo createPulPredictContainer(MultipartFile file) {
         String token = TokenUtils.generateNewToken();
         Path outputPath = createOutputDir(token);
         Path inputFile = createInputFile(token, file);
@@ -129,7 +120,7 @@ public class PredictServiceImpl implements PredictService {
                     .updateTime(new Date())
                     .build();
             repository.save(jobInfoPO);
-            return token;
+            return JobInfoMapper.INSTANCE.entity(jobInfoPO);
         }
     }
 
@@ -164,6 +155,7 @@ public class PredictServiceImpl implements PredictService {
                         .orElseThrow(() -> new NotFoundException("can not find related job of container: " + id));
                 po.setStatus(JobStatus.fromContainerState(statePO));
                 po.setContainerState(statePO);
+                po.setUpdateTime(new Date());
                 log.info("update job status: {}", po.getStatus());
                 log.info("update container status: {}", statePO.getStatus());
                 repository.save(po);
@@ -185,6 +177,8 @@ public class PredictServiceImpl implements PredictService {
 
 
     /*============================= read predict result ==================================*/
+    @Resource
+    SpeciesRepository speciesRepository;
 
     private final Pattern gcfPattern = Pattern.compile(".(\\d+)\\.?.*");
 

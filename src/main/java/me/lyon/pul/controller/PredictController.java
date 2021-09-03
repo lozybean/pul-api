@@ -25,9 +25,12 @@ public class PredictController {
     GggeneService gggeneService;
 
     @PostMapping
-    public WebResponse<String> submitPredictJob(MultipartFile file) {
-        String token = predictService.createPulPredictContainer(file);
-        return WebResponse.ok(token);
+    public WebResponse<JobInfo> submitPredictJob(MultipartFile file) {
+        JobInfo jobInfo = predictService.createPulPredictContainer(file);
+        // hidden some field
+        jobInfo.setId(null);
+        jobInfo.setContainerState(null);
+        return WebResponse.ok(jobInfo);
     }
 
     @GetMapping("{token}")

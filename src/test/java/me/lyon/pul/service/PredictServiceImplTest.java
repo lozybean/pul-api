@@ -33,9 +33,8 @@ public class PredictServiceImplTest {
                 MediaType.MULTIPART_FORM_DATA_VALUE,
                 fileResource.getInputStream());
 
-        String token = predictService.createPulPredictContainer(file);
-        Assert.assertNotNull(token);
-        JobInfo jobInfo = predictService.findByToken(token);
+        JobInfo jobInfo = predictService.createPulPredictContainer(file);
+        Assert.assertNotNull(jobInfo);
         Assert.assertEquals(JobStatus.INIT, jobInfo.getStatus());
         Assert.assertEquals(ContainerStatus.CREATED, jobInfo.getContainerState().getStatus());
 
