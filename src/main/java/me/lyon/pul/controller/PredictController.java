@@ -87,7 +87,7 @@ public class PredictController {
     ) {
         List<PulInfo> pulInfos = predictService.readPredictResult(token);
         PulInfo pulInfo = pulInfos.stream()
-                .filter(pul -> pul.getPulId().equals(pulId))
+                .filter(pul -> pul.getId().equals(pulId))
                 .findAny()
                 .orElseThrow(() -> new NotFoundException("no such pulId in related token result"));
         try {
