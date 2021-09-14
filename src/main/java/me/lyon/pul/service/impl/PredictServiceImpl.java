@@ -111,8 +111,8 @@ public class PredictServiceImpl implements PredictService {
 
         try (CreateContainerCmd cmd = dockerClient.createContainerCmd(config.getDockerImage())
                 .withHostConfig(HostConfig.newHostConfig()
-                        .withCpuCount(1L)
-                        .withMemory(100_000_000L)
+                        .withCpuCount(config.getDockerCpu())
+                        .withMemory(config.getDockerMemory())
                         .withBinds(
                                 Bind.parse(String.format("%s:/home/tao/Documents", config.getReferencePath())),
                                 Bind.parse(String.format("%s:/home/tao/Documents/PUL_prediction_online_analysis/Output_file:rw", outputPath)),
@@ -339,8 +339,8 @@ public class PredictServiceImpl implements PredictService {
             throw new BizException("job still not success");
         }
 
-        Path pulInfoResult = Path.of(config.getOutputPath(), "PUL_information");
-        Path pulContentResult = Path.of(config.getOutputPath(), "PUL_protein_information");
+        Path pulInfoResult = Path.of(config.getOutputPath(), token, "PUL_information");
+        Path pulContentResult = Path.of(config.getOutputPath(), token, "PUL_protein_information");
         if (!pulInfoResult.toFile().exists()) {
             log.error(String.format("result file: %s not found!", pulInfoResult));
             throw new BizException("result file not found!");
