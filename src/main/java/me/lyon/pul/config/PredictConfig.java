@@ -21,6 +21,7 @@ public class PredictConfig {
     private Long dockerCpu = 1L;
     private Long dockerMemory = 100_000_000L;
     private Long maxRetryTimes = 3L;
+    private Long reserveResultDays = 7L;
     private String referencePath;
     private String inputPath;
     private String outputPath;

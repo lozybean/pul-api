@@ -81,14 +81,16 @@ public class PredictServiceImpl implements PredictService {
     }
 
     @Override
-    public Optional<JobInfo> findFirstInitJob() {
-        return repository.findFirstByStatusOrderByIdAsc(JobStatus.INIT)
-                .map(JobInfoMapper.INSTANCE::entity);
+    public List<JobInfo> listJobs() {
+        return repository.findAll()
+                .stream()
+                .map(JobInfoMapper.INSTANCE::entity)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public Optional<JobInfo> findFirstRetryJob() {
-        return repository.findFirstByStatusOrderByIdAsc(JobStatus.RETRYING)
+    public Optional<JobInfo> findFirstRunnableJob() {
+        return repository.findFirstByStatusInOrderByIdAsc(Set.of(JobStatus.INIT, JobStatus.RETRYING))
                 .map(JobInfoMapper.INSTANCE::entity);
     }
 
@@ -102,7 +104,7 @@ public class PredictServiceImpl implements PredictService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public synchronized JobInfo createPredictJob(MultipartFile file) {
+    public JobInfo createPredictJob(MultipartFile file) {
         String token = TokenUtils.generateNewToken();
         Path outputPath = createOutputDir(token);
         Path inputFile = createInputFile(token, file);
@@ -112,7 +114,7 @@ public class PredictServiceImpl implements PredictService {
                         .withCpuCount(1L)
                         .withMemory(100_000_000L)
                         .withBinds(
-                                Bind.parse(String.format("%s:/home/tao/Documents:ro", config.getReferencePath())),
+                                Bind.parse(String.format("%s:/home/tao/Documents", config.getReferencePath())),
                                 Bind.parse(String.format("%s:/home/tao/Documents/PUL_prediction_online_analysis/Output_file:rw", outputPath)),
                                 Bind.parse(String.format("%s:/home/tao/Documents/PUL_prediction_online_analysis/Genomes/GCF_000013665.1_ASM1366v1_genomic.gbff:rw", inputFile))
                         ))) {
@@ -137,7 +139,11 @@ public class PredictServiceImpl implements PredictService {
     }
 
     private void increaseRetryTime(JobInfo jobInfo) {
-        jobInfo.setRetryTimes(jobInfo.getRetryTimes() + 1);
+        if (Objects.isNull(jobInfo.getRetryTimes())) {
+            jobInfo.setRetryTimes(0);
+        } else {
+            jobInfo.setRetryTimes(jobInfo.getRetryTimes() + 1);
+        }
         JobInfoPO po = JobInfoMapper.INSTANCE.po(jobInfo);
         repository.save(po);
     }
@@ -147,10 +153,6 @@ public class PredictServiceImpl implements PredictService {
     @Override
     public synchronized JobInfo startPredictJob(String token) {
         JobInfo jobInfo = findByToken(token);
-        if (!JobStatus.INIT.equals(jobInfo.getStatus())) {
-            log.warn("job not in INIT status: {}", token);
-            return jobInfo;
-        }
         String containerId = jobInfo.getContainerState().getId();
         ContainerState containerState = inspectContainer(containerId);
         if (ContainerStatus.RUNNING != containerState.getStatus()) {
@@ -182,7 +184,7 @@ public class PredictServiceImpl implements PredictService {
     @CachePut(cacheNames = "predictJob", key = "#token")
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public synchronized JobInfo updatePredictJobStatus(String token) {
+    public JobInfo updatePredictJobStatus(String token) {
         JobInfo jobInfo = findByToken(token);
         String containerId = jobInfo.getContainerState().getId();
         ContainerState containerState = inspectContainer(containerId);
@@ -196,7 +198,7 @@ public class PredictServiceImpl implements PredictService {
         return JobInfoMapper.INSTANCE.entity(po);
     }
 
-    private synchronized ContainerState inspectContainer(String id) {
+    private ContainerState inspectContainer(String id) {
         try (InspectContainerCmd cmd = dockerClient.inspectContainerCmd(id)) {
             InspectContainerResponse response = cmd.exec();
             return JobInfoMapper.INSTANCE.entity(id, response.getState());
@@ -208,7 +210,7 @@ public class PredictServiceImpl implements PredictService {
 
     @CacheEvict(cacheNames = "predictJob", key = "#token")
     @Override
-    public synchronized void cleanPredictJob(String token) {
+    public void cleanPredictJob(String token) {
         JobInfo jobInfo = findByToken(token);
         String containerId = jobInfo.getContainerState().getId();
         try (RemoveContainerCmd cmd = dockerClient.removeContainerCmd(containerId)) {

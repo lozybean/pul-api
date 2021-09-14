@@ -44,6 +44,11 @@
       "name": "predict.max-retry-times",
       "type": "java.lang.String",
       "description": "max retry times until job is failed or success."
+    },
+    {
+      "name": "predict.reserve-result-days",
+      "type": "java.lang.String",
+      "description": "how many days to reserve result."
     }
   ]
 }

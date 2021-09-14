@@ -9,18 +9,18 @@ import java.util.Optional;
 
 public interface PredictService {
     /**
-     * find first job which status is INIT
+     * list all jobs
      *
      * @return :
      */
-    Optional<JobInfo> findFirstInitJob();
+    List<JobInfo> listJobs();
 
     /**
-     * find first job which status is FAILED and retry times
+     * find first job to run
      *
      * @return :
      */
-    Optional<JobInfo> findFirstRetryJob();
+    Optional<JobInfo> findFirstRunnableJob();
 
     /**
      * find job info by token

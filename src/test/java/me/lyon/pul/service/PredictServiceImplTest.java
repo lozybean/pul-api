@@ -44,7 +44,7 @@ public class PredictServiceImplTest {
 
     @Test
     public void findFirstInitJob() {
-        Optional<JobInfo> jobInfoOptional = predictService.findFirstInitJob();
+        Optional<JobInfo> jobInfoOptional = predictService.findFirstRunnableJob();
         Assert.assertTrue(jobInfoOptional.isPresent());
         Assert.assertEquals(5, jobInfoOptional.get().getId().intValue());
     }

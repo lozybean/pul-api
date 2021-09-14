@@ -37,6 +37,7 @@ predict:
   docker-cpu: 1
   docker-memory: 100000000
   max-retry-times: 3
+  reserve-result-days: 7
   reference-path: "/Volumes/portable/me/pul/predict"
   input-path: "/Volumes/portable/me/pul/predict/test_input"
   output-path: "/Volumes/portable/me/pul/predict/test_output"
