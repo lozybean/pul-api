@@ -3,10 +3,7 @@ package me.lyon.pul.controller;
 import lombok.extern.slf4j.Slf4j;
 import me.lyon.pul.constant.JobStatus;
 import me.lyon.pul.exception.NotFoundException;
-import me.lyon.pul.model.entity.Gggenes;
-import me.lyon.pul.model.entity.JobInfo;
-import me.lyon.pul.model.entity.PulInfo;
-import me.lyon.pul.model.entity.WebResponse;
+import me.lyon.pul.model.entity.*;
 import me.lyon.pul.service.GggeneService;
 import me.lyon.pul.service.PredictService;
 import org.springframework.web.bind.annotation.*;
@@ -53,7 +50,7 @@ public class PredictController {
     }
 
     @GetMapping("{token}/puls")
-    public WebResponse<List<PulInfo>> getPredictResult(
+    public WebResponse<PageData<PulInfo>> getPredictResult(
             @PathVariable String token
     ) {
         JobInfo jobInfo = predictService.findByToken(token);
@@ -67,7 +64,11 @@ public class PredictController {
             return WebResponse.warn(String.format("failed! %s", jobInfo.getContainerState().getError()));
         }
         List<PulInfo> pulInfos = predictService.readPredictResult(token);
-        return WebResponse.ok(pulInfos);
+        PageData<PulInfo> pageData = PageData.<PulInfo>builder()
+                .list(pulInfos)
+                .total(pulInfos.size())
+                .build();
+        return WebResponse.ok(pageData);
     }
 
     @GetMapping("{token}/puls/{pulId}")
