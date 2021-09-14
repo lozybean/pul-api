@@ -356,6 +356,7 @@ public class PredictServiceImpl implements PredictService {
         final List<PulContent> pulContents = pulContentsLines
                 .stream()
                 .map(this::parsePulContent)
+                .sorted()
                 .collect(Collectors.toList());
         return pulInfoLines
                 .stream()
