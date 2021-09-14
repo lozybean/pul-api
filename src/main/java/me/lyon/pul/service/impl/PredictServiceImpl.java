@@ -86,6 +86,12 @@ public class PredictServiceImpl implements PredictService {
                 .map(JobInfoMapper.INSTANCE::entity);
     }
 
+    @Override
+    public Optional<JobInfo> findFirstRetryJob() {
+        return repository.findFirstByStatusOrderByIdAsc(JobStatus.RETRYING)
+                .map(JobInfoMapper.INSTANCE::entity);
+    }
+
     @Cacheable(cacheNames = "predictJob", key = "#token")
     @Override
     public JobInfo findByToken(String token) {
@@ -130,6 +136,12 @@ public class PredictServiceImpl implements PredictService {
         }
     }
 
+    private void increaseRetryTime(JobInfo jobInfo) {
+        jobInfo.setRetryTimes(jobInfo.getRetryTimes() + 1);
+        JobInfoPO po = JobInfoMapper.INSTANCE.po(jobInfo);
+        repository.save(po);
+    }
+
     @CachePut(cacheNames = "predictJob", key = "#token")
     @Transactional(rollbackFor = Exception.class)
     @Override
@@ -144,6 +156,7 @@ public class PredictServiceImpl implements PredictService {
         if (ContainerStatus.RUNNING != containerState.getStatus()) {
             try (StartContainerCmd cmd = dockerClient.startContainerCmd(containerId)) {
                 cmd.exec();
+                increaseRetryTime(jobInfo);
             }
         }
         return updatePredictJobStatus(token);
@@ -175,7 +188,8 @@ public class PredictServiceImpl implements PredictService {
         ContainerState containerState = inspectContainer(containerId);
         ContainerStatePO containerStatePO = JobInfoMapper.INSTANCE.po(containerState);
         JobInfoPO po = JobInfoMapper.INSTANCE.po(jobInfo);
-        po.setStatus(JobStatus.fromContainerState(containerStatePO));
+        boolean maxRetried = po.getRetryTimes() >= config.getMaxRetryTimes();
+        po.setStatus(JobStatus.fromContainerState(containerStatePO, maxRetried));
         po.setContainerState(containerStatePO);
         po.setUpdateTime(new Date());
         repository.save(po);

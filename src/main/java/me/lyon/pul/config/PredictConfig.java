@@ -20,6 +20,7 @@ public class PredictConfig {
     private String dockerImage = "pul-predict:1.0.0";
     private Long dockerCpu = 1L;
     private Long dockerMemory = 100_000_000L;
+    private Long maxRetryTimes = 3L;
     private String referencePath;
     private String inputPath;
     private String outputPath;

@@ -8,21 +8,37 @@ public enum JobStatus {
     INIT,
     RUNNING,
     FAILED,
+    /**
+     * RETRYING 状态
+     */
+    RETRYING,
     SUCCESS;
 
-    public static JobStatus fromContainerState(ContainerStatePO state) {
+    public static JobStatus fromContainerState(ContainerStatePO state, boolean maxRetried) {
         if (ContainerStatus.CREATED == state.getStatus()) {
             return INIT;
         } else if (Set.of(ContainerStatus.RUNNING, ContainerStatus.PAUSED,
                 ContainerStatus.REMOVING, ContainerStatus.RESTARTING).contains(state.getStatus())) {
             return RUNNING;
         } else if (ContainerStatus.DEAD == state.getStatus()) {
-            return FAILED;
+            if (maxRetried) {
+                return FAILED;
+            } else {
+                return RETRYING;
+            }
         } else if (ContainerStatus.EXITED == state.getStatus() && state.getExitCode() == 0L) {
             return SUCCESS;
         } else if (ContainerStatus.EXITED == state.getStatus() && state.getExitCode() != 0L) {
-            return FAILED;
+            if (maxRetried) {
+                return FAILED;
+            } else {
+                return RETRYING;
+            }
         }
-        return FAILED;
+        if (maxRetried) {
+            return FAILED;
+        } else {
+            return RETRYING;
+        }
     }
 }

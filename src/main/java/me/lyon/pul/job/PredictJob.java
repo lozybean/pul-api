@@ -19,13 +19,22 @@ public class PredictJob {
     @Scheduled(initialDelay = 5000, fixedDelay = 5000)
     public void runPredict() {
         Optional<JobInfo> jobInfoOptional = predictService.findFirstInitJob();
-        if (jobInfoOptional.isEmpty()) {
+        if (jobInfoOptional.isPresent()) {
+            JobInfo jobInfo = jobInfoOptional.get();
+            String token = jobInfo.getToken();
+            log.info("find init job to run: {}, token: {}", jobInfo.getId(), token);
+            predictService.startPredictJob(token);
+            predictService.waitPredictJobFinish(token);
+            // 执行完成一个任务后退出
             return;
         }
-        JobInfo jobInfo = jobInfoOptional.get();
-        String token = jobInfo.getToken();
-        log.info("find init job to run: {}, token: {}", jobInfo.getId(), token);
-        predictService.startPredictJob(token);
-        predictService.waitPredictJobFinish(token);
+        jobInfoOptional = predictService.findFirstRetryJob();
+        if (jobInfoOptional.isPresent()) {
+            JobInfo jobInfo = jobInfoOptional.get();
+            String token = jobInfo.getToken();
+            log.info("retrying job : {}, token: {}", jobInfo.getId(), token);
+            predictService.startPredictJob(token);
+            predictService.waitPredictJobFinish(token);
+        }
     }
 }

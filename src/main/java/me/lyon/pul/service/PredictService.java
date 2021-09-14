@@ -16,6 +16,13 @@ public interface PredictService {
     Optional<JobInfo> findFirstInitJob();
 
     /**
+     * find first job which status is FAILED and retry times
+     *
+     * @return :
+     */
+    Optional<JobInfo> findFirstRetryJob();
+
+    /**
      * find job info by token
      *
      * @param token :

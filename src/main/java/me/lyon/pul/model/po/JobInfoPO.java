@@ -29,6 +29,8 @@ public class JobInfoPO {
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
     private JobStatus status;
+    @Column(name = "retry_times")
+    private Integer retryTimes;
     @Column(name = "create_time", updatable = false)
     private Date createTime;
     @Column(name = "update_time")

@@ -14,6 +14,7 @@ public class JobInfo implements Serializable {
     private String token;
     private ContainerState containerState;
     private JobStatus status;
+    private Integer retryTimes;
     private Date createTime;
     private Date updateTime;
 }

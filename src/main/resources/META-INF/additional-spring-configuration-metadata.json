@@ -39,6 +39,11 @@
       "name": "predict.output-path",
       "type": "java.lang.String",
       "description": "output path for pul predicate, output files will be create under this path."
+    },
+    {
+      "name": "predict.max-retry-times",
+      "type": "java.lang.String",
+      "description": "max retry times until job is failed or success."
     }
   ]
 }

@@ -4,6 +4,7 @@ CREATE TABLE job_info
     token        varchar(24),
     container_id varchar(64),
     status       varchar(64),
+    retry_times  int       default 0,
     create_time  timestamp default current_timestamp,
     update_time  timestamp default current_timestamp
 );
