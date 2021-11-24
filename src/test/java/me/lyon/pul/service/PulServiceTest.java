@@ -91,6 +91,19 @@ public class PulServiceTest {
     }
 
     @Test
+    public void fuzzyQueryPulByLinage() {
+        List<PulInfo> pulInfos = service.queryPulByLinage(null, null, "Clostridioides", null);
+        for (PulInfo pulInfo : pulInfos) {
+            Assert.assertTrue(pulInfo.getSpSpecies().toLowerCase().contains("clostridioides"));
+        }
+
+        pulInfos = service.queryPulByLinage(null, null, null, "Proteob");
+        for (PulInfo pulInfo : pulInfos) {
+            Assert.assertTrue(pulInfo.getSpPhylum().toLowerCase().contains("proteob"));
+        }
+    }
+
+    @Test
     public void queryPulByDomainName() {
         PageData<PulInfo> pulInfoPage = service.queryPulByDomainName("Response_reg", pageable);
         Assert.assertEquals(5333, pulInfoPage.getTotal().intValue());

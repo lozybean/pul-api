@@ -116,7 +116,7 @@ public class PulServiceImpl implements PulService {
         }
         if (!StringUtils.isEmpty(spSpecies)) {
             Expression<String> lower = criteriaBuilder.lower(root.get(SPECIES_PROPS).get("spSpecies").as(String.class));
-            list.add(criteriaBuilder.equal(lower, spSpecies.toLowerCase()));
+            list.add(criteriaBuilder.like(lower, "%" + spSpecies.toLowerCase() + "%"));
         }
         if (!StringUtils.isEmpty(spPhylum)) {
             if (OTHER_PHYLUM_EXPRESS.equals(spPhylum)) {
@@ -125,7 +125,7 @@ public class PulServiceImpl implements PulService {
                 list.add(criteriaBuilder.not(in));
             } else {
                 Expression<String> lower = criteriaBuilder.lower(root.get(SPECIES_PROPS).get("spPhylum").as(String.class));
-                list.add(criteriaBuilder.equal(lower, spPhylum.toLowerCase()));
+                list.add(criteriaBuilder.like(lower, "%" + spPhylum.toLowerCase() + "%"));
             }
         }
         return criteriaBuilder.and(list.toArray(new Predicate[0]));
