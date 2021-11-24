@@ -27,6 +27,9 @@ public interface PulService {
      */
     PageData<PulInfo> queryPulByType(String pulType, Pageable pageable);
 
+
+    List<PulInfo> queryPulByType(String pulType);
+
     /**
      * 通过物种信息 检索PUL
      *
@@ -43,6 +46,11 @@ public interface PulService {
                                        String spPhylum,
                                        Pageable pageable);
 
+    List<PulInfo> queryPulByLinage(Integer taxonomyId,
+                                   String assemblyAccession,
+                                   String spSpecies,
+                                   String spPhylum);
+
     /**
      * 通过 gene.domain 检索PUL
      *
@@ -51,6 +59,8 @@ public interface PulService {
      * @return :
      */
     PageData<PulInfo> queryPulByDomainName(String domainName, Pageable pageable);
+
+    List<PulInfo> queryPulByDomainName(String domainName);
 
     /**
      * 根据类型聚合

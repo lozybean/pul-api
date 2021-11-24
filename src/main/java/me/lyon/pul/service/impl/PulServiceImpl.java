@@ -1,5 +1,6 @@
 package me.lyon.pul.service.impl;
 
+import lombok.extern.slf4j.Slf4j;
 import me.lyon.pul.model.mapper.PulMapper;
 import me.lyon.pul.model.po.PulPO;
 import me.lyon.pul.model.entity.NameCount;
@@ -15,16 +16,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@CacheConfig(cacheNames = {"pulInfo", "pulInfoPage", "aggregateByType", "aggregateByPhylum"})
+@Slf4j
+@CacheConfig(cacheNames = {"pulInfo", "pulInfoList", "pulInfoPage", "aggregateByType", "aggregateByPhylum"})
 @Service
 public class PulServiceImpl implements PulService {
     private static final Set<String> MAIN_PHYLUM_LIST = Set.of("Actinobacteria", "Bacteroidetes", "Firmicutes", "Proteobacteria");
+    private static final String SPECIES_PROPS = "species";
+    private static final String OTHER_PHYLUM_EXPRESS = "other";
 
     @Resource
     PulRepository pulRepository;
@@ -62,7 +64,7 @@ public class PulServiceImpl implements PulService {
             newOrders.add(new Sort.Order(order.getDirection(), fieldMap.get(order.getProperty())));
         }
         if (newOrders.isEmpty()) {
-            return Sort.unsorted();
+            return Sort.by("id");
         } else {
             return Sort.by(newOrders.toArray(Sort.Order[]::new));
         }
@@ -90,37 +92,49 @@ public class PulServiceImpl implements PulService {
                 .build();
     }
 
+    @Override
+    public List<PulInfo> queryPulByType(String pulType) {
+        List<PulPO> pulPos = pulRepository.findAllByTypeIgnoreCaseOrderById(pulType);
+        return pulPos.stream()
+                .map(PulMapper.INSTANCE::pulInfo)
+                .collect(Collectors.toList());
+    }
+
+    private Predicate buildCriteriaByLinage(Root<PulPO> root, CriteriaQuery<?> criteriaQuery, CriteriaBuilder criteriaBuilder,
+                                            Integer taxonomyId, String assemblyAccession, String spSpecies, String spPhylum
+    ) {
+        List<Predicate> list = new ArrayList<>();
+        if (Objects.nonNull(taxonomyId)) {
+            list.add(criteriaBuilder.equal(root.get(SPECIES_PROPS).get("taxid").as(Integer.class), taxonomyId));
+        }
+        if (!StringUtils.isEmpty(assemblyAccession)) {
+            Expression<String> lower = criteriaBuilder.lower(root.get(SPECIES_PROPS).get("gcfNumber").as(String.class));
+            list.add(criteriaBuilder.equal(lower, assemblyAccession.toLowerCase()));
+        }
+        if (!StringUtils.isEmpty(spSpecies)) {
+            Expression<String> lower = criteriaBuilder.lower(root.get(SPECIES_PROPS).get("spSpecies").as(String.class));
+            list.add(criteriaBuilder.equal(lower, spSpecies.toLowerCase()));
+        }
+        if (!StringUtils.isEmpty(spPhylum)) {
+            if (OTHER_PHYLUM_EXPRESS.equals(spPhylum)) {
+                final CriteriaBuilder.In<String> in = criteriaBuilder.in(root.get(SPECIES_PROPS).get("spPhylum").as(String.class));
+                MAIN_PHYLUM_LIST.forEach(in::value);
+                list.add(criteriaBuilder.not(in));
+            } else {
+                Expression<String> lower = criteriaBuilder.lower(root.get(SPECIES_PROPS).get("spPhylum").as(String.class));
+                list.add(criteriaBuilder.equal(lower, spPhylum.toLowerCase()));
+            }
+        }
+        return criteriaBuilder.and(list.toArray(new Predicate[0]));
+    }
+
     @Cacheable(cacheNames = "pulInfoPage")
     @Override
     public PageData<PulInfo> queryPulByLinage(Integer taxonomyId, String assemblyAccession, String spSpecies, String spPhylum, Pageable pageable) {
-        final String speciesProp = "species";
-        final String otherPhylumExpress = "other";
         pageable = mapPageable(pageable);
-        Page<PulPO> pulPoPage = pulRepository.findAll((Specification<PulPO>) (root, criteriaQuery, criteriaBuilder) -> {
-            List<Predicate> list = new ArrayList<>();
-            if (Objects.nonNull(taxonomyId)) {
-                list.add(criteriaBuilder.equal(root.get(speciesProp).get("taxid").as(Integer.class), taxonomyId));
-            }
-            if (!StringUtils.isEmpty(assemblyAccession)) {
-                Expression<String> lower = criteriaBuilder.lower(root.get(speciesProp).get("gcfNumber").as(String.class));
-                list.add(criteriaBuilder.equal(lower, assemblyAccession.toLowerCase()));
-            }
-            if (!StringUtils.isEmpty(spSpecies)) {
-                Expression<String> lower = criteriaBuilder.lower(root.get(speciesProp).get("spSpecies").as(String.class));
-                list.add(criteriaBuilder.equal(lower, spSpecies.toLowerCase()));
-            }
-            if (!StringUtils.isEmpty(spPhylum)) {
-                if (otherPhylumExpress.equals(spPhylum)) {
-                    final CriteriaBuilder.In<String> in = criteriaBuilder.in(root.get(speciesProp).get("spPhylum").as(String.class));
-                    MAIN_PHYLUM_LIST.forEach(in::value);
-                    list.add(criteriaBuilder.not(in));
-                } else {
-                    Expression<String> lower = criteriaBuilder.lower(root.get(speciesProp).get("spPhylum").as(String.class));
-                    list.add(criteriaBuilder.equal(lower, spPhylum.toLowerCase()));
-                }
-            }
-            return criteriaBuilder.and(list.toArray(new Predicate[0]));
-        }, pageable);
+        Page<PulPO> pulPoPage = pulRepository.findAll((Specification<PulPO>) (root, criteriaQuery, criteriaBuilder) ->
+                this.buildCriteriaByLinage(root, criteriaQuery, criteriaBuilder,
+                        taxonomyId, assemblyAccession, spSpecies, spPhylum), pageable);
         return PageData.<PulInfo>builder()
                 .list(pulPoPage.getContent()
                         .stream()
@@ -128,6 +142,16 @@ public class PulServiceImpl implements PulService {
                         .collect(Collectors.toList()))
                 .total((int) pulPoPage.getTotalElements())
                 .build();
+    }
+
+    @Override
+    public List<PulInfo> queryPulByLinage(Integer taxonomyId, String assemblyAccession, String spSpecies, String spPhylum) {
+        List<PulPO> pulPos = pulRepository.findAll((Specification<PulPO>) (root, criteriaQuery, criteriaBuilder) ->
+                this.buildCriteriaByLinage(root, criteriaQuery, criteriaBuilder,
+                        taxonomyId, assemblyAccession, spSpecies, spPhylum), Sort.by("id"));
+        return pulPos.stream()
+                .map(PulMapper.INSTANCE::pulInfo)
+                .collect(Collectors.toList());
     }
 
     @Cacheable(cacheNames = "pulInfoPage")
@@ -142,6 +166,14 @@ public class PulServiceImpl implements PulService {
                         .collect(Collectors.toList()))
                 .total((int) pulPoPage.getTotalElements())
                 .build();
+    }
+
+    @Override
+    public List<PulInfo> queryPulByDomainName(String domainName) {
+        List<PulPO> pulPos = pulRepository.findAllByDomain(domainName.toLowerCase());
+        return pulPos.stream()
+                .map(PulMapper.INSTANCE::pulInfo)
+                .collect(Collectors.toList());
     }
 
     @Cacheable(cacheNames = "aggregateByType")

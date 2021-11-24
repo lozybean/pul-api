@@ -21,6 +21,8 @@ public interface PulRepository extends JpaRepository<PulPO, String>, JpaSpecific
      */
     Page<PulPO> findAllByTypeIgnoreCase(String type, Pageable pageable);
 
+    List<PulPO> findAllByTypeIgnoreCaseOrderById(String type);
+
     /**
      * 通过 gene.domain 检索
      *
@@ -33,6 +35,13 @@ public interface PulRepository extends JpaRepository<PulPO, String>, JpaSpecific
             "inner join public.species species on species.id = pul.gcf_id " +
             "where lower(gene.domain\\:\\:varchar)\\:\\:varchar[] @> ARRAY[?1]\\:\\:varchar[]", nativeQuery = true)
     Page<PulPO> findAllByDomain(String domain, Pageable pageable);
+
+    @Query(value = "select * from public.pul pul " +
+            "inner join public.gene gene on pul.id = gene.pul_id " +
+            "inner join public.species species on species.id = pul.gcf_id " +
+            "where lower(gene.domain\\:\\:varchar)\\:\\:varchar[] @> ARRAY[?1]\\:\\:varchar[] " +
+            "order by pul.id", nativeQuery = true)
+    List<PulPO> findAllByDomain(String domain);
 
     /**
      * 通过类型聚合
