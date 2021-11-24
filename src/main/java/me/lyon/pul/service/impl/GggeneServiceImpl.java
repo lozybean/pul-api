@@ -58,7 +58,7 @@ public class GggeneServiceImpl implements GggeneService {
                         "  facet_wrap(~ molecule, scales = \"free\", ncol = 1) +\n" +
                         "  scale_fill_manual(values=myColors) +\n" +
                         "  theme_genes() +\n" +
-                        "  theme(legend.position=\"none\", axis.title.y=element_blank()) +\n" +
+                        "  theme(legend.position=\"top\", legend.title = element_text( size=12, face=\"bold\"), axis.title.y=element_blank()) +\n" +
                         "  xlab(\"%s\")",
                 arrowStart, geneName[0],
                 arrowStart, arrowStart,

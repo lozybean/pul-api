@@ -15,9 +15,9 @@ myColors <- c("UNKNOWN"="#A6CEE3","MME"="#1F78B4","TF"="#B2DF8A",
               "carbonhydrate active enzymes"="#33A02C",
               "sugar transporter or sugar binding protein"="#FB9A99")
 sub_genes = subset(example_genes, molecule=="Genome5")
-sub_genes$cls <- c("TF", "TF", "UNKNOWN", "MME", "MME", "carbonhydrate associating enzymes", "carbonhydrate associating enzymes", "sugar transporter or sugar binding protein", "TF", "UNKNOWN")
+sub_genes$classification <- c("TF", "TF", "UNKNOWN", "MME", "MME", "carbonhydrate associating enzymes", "carbonhydrate associating enzymes", "sugar transporter or sugar binding protein", "TF", "UNKNOWN")
 
-gg <- ggplot(sub_genes, aes(xmin = start, xmax = end, y = molecule, fill=cls,
+gg <- ggplot(sub_genes, aes(xmin = start, xmax = end, y = molecule, fill=classification,
                           forward = orientation, labels=gene)) +
   geom_gene_arrow() +
   facet_wrap(~ molecule, scales = "free", ncol = 1) +
@@ -25,7 +25,8 @@ gg <- ggplot(sub_genes, aes(xmin = start, xmax = end, y = molecule, fill=cls,
   theme_genes() +
   annotate("text",x=405113,y=1.1,label="genA") +
   annotate("text",x=405113,y=1.1,label="genA") +
-  theme(legend.position="none",
+  theme(legend.position="top",
+        legend.title = element_text( size=12, face="bold"),
         axis.title.y=element_blank()) +
   xlab("species name")
 
