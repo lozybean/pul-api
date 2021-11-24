@@ -9,12 +9,13 @@ import me.lyon.pul.service.PulService;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 @Slf4j
@@ -53,7 +54,7 @@ public class PulController {
 
     @PostMapping("query")
     @ResponseBody
-    public WebResponse<PageData<PulInfo>> listAll(
+    public WebResponse<PageData<PulInfo>> queryWithPageable(
             @RequestBody PulQuery query
     ) {
         Pageable pageable;
@@ -85,6 +86,72 @@ public class PulController {
             default:
                 return WebResponse.warn("不支持该检索方式：" + query.getOption());
         }
+    }
+
+    @PostMapping("query/all")
+    @ResponseBody
+    public WebResponse<List<PulInfo>> queryAll(
+            @RequestBody PulQuery query
+    ) {
+        boolean searchWithType = !query.getValPulType().isBlank();
+        List<PulInfo> pulInfosByType = pulService.queryPulByType(query.getValPulType());
+        Set<String> pulIdsByType = pulInfosByType.stream()
+                .parallel()
+                .map(PulInfo::getId)
+                .collect(Collectors.toSet());
+
+        boolean searchWithLinage = Objects.nonNull(query.getValTaxonomyId()) &&
+                !query.getValAssemblyAccession().isBlank() &&
+                !query.getValSpecies().isBlank() &&
+                !query.getValPhylum().isBlank();
+        List<PulInfo> pulInfosByLinage = pulService.queryPulByLinage(
+                query.getValTaxonomyId(),
+                query.getValAssemblyAccession(),
+                query.getValSpecies(),
+                query.getValPhylum());
+        Set<String> pulIdsByLinage = pulInfosByLinage.stream()
+                .parallel()
+                .map(PulInfo::getId)
+                .collect(Collectors.toSet());
+
+        boolean searchWithDomain = !query.getValDomainName().isBlank();
+        List<PulInfo> pulInfosByDomain = pulService.queryPulByDomainName(query.getValDomainName());
+        Set<String> pulIdsByDomain = pulInfosByDomain.stream()
+                .parallel()
+                .map(PulInfo::getId)
+                .collect(Collectors.toSet());
+
+        // 当未使用某个维度检索时，该维度不参与交集运算，为了统一逻辑，将该集合设置为并集
+        // A = a | b | c
+        // ∵ a is empty
+        // ∴ A = b | c
+        // ∴ A & B & C = (b|c) & b & c = b & c
+        // 相当于 a 不参与交集运算
+        if (!searchWithType) {
+            pulIdsByType.addAll(pulIdsByLinage);
+            pulIdsByType.addAll(pulIdsByDomain);
+        }
+        if (!searchWithLinage) {
+            pulIdsByLinage.addAll(pulIdsByType);
+            pulIdsByLinage.addAll(pulIdsByDomain);
+        }
+        if (!searchWithDomain) {
+            pulIdsByDomain.addAll(pulIdsByType);
+            pulIdsByDomain.addAll(pulIdsByLinage);
+        }
+
+        Set<String> retainIds = new HashSet<>(pulIdsByType);
+        retainIds.retainAll(pulIdsByLinage);
+        retainIds.retainAll(pulIdsByDomain);
+
+        List<PulInfo> pulInfos = Stream.of(pulInfosByType, pulInfosByLinage, pulInfosByDomain)
+                .flatMap(Collection::stream)
+                .filter(pulInfo -> retainIds.contains(pulInfo.getId()))
+                .distinct()
+                .sorted(Comparator.comparing(PulInfo::getId))
+                .collect(Collectors.toList());
+
+        return WebResponse.ok(pulInfos);
     }
 
     @GetMapping("{id}")

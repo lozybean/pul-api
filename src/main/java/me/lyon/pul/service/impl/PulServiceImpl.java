@@ -94,6 +94,9 @@ public class PulServiceImpl implements PulService {
 
     @Override
     public List<PulInfo> queryPulByType(String pulType) {
+        if (Objects.isNull(pulType)) {
+            return new LinkedList<>();
+        }
         List<PulPO> pulPos = pulRepository.findAllByTypeIgnoreCaseOrderById(pulType);
         return pulPos.stream()
                 .map(PulMapper.INSTANCE::pulInfo)
@@ -146,6 +149,9 @@ public class PulServiceImpl implements PulService {
 
     @Override
     public List<PulInfo> queryPulByLinage(Integer taxonomyId, String assemblyAccession, String spSpecies, String spPhylum) {
+        if (Objects.isNull(taxonomyId) && Objects.isNull(assemblyAccession) && Objects.isNull(spSpecies) && Objects.isNull(spPhylum)) {
+            return new LinkedList<>();
+        }
         List<PulPO> pulPos = pulRepository.findAll((Specification<PulPO>) (root, criteriaQuery, criteriaBuilder) ->
                 this.buildCriteriaByLinage(root, criteriaQuery, criteriaBuilder,
                         taxonomyId, assemblyAccession, spSpecies, spPhylum), Sort.by("id"));
@@ -170,6 +176,9 @@ public class PulServiceImpl implements PulService {
 
     @Override
     public List<PulInfo> queryPulByDomainName(String domainName) {
+        if (Objects.isNull(domainName)) {
+            return new LinkedList<>();
+        }
         List<PulPO> pulPos = pulRepository.findAllByDomain(domainName.toLowerCase());
         return pulPos.stream()
                 .map(PulMapper.INSTANCE::pulInfo)
