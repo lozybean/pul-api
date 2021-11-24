@@ -37,7 +37,7 @@ public class PulPO implements Serializable {
     private SpeciesPO species;
 
     @OneToMany(mappedBy = "pul",
-            cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+            cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<GenePO> contents;
 
     @Override

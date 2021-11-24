@@ -99,7 +99,7 @@ public class PulServiceImpl implements PulService {
     @Cacheable(cacheNames = "pulInfoList")
     @Override
     public List<PulListVO> queryPulByType(String pulType) {
-        if (Objects.isNull(pulType)) {
+        if (pulType.isBlank()) {
             return new LinkedList<>();
         }
         List<PulPO> pulPos = pulRepository.findAllByTypeIgnoreCaseOrderById(pulType);
@@ -155,7 +155,7 @@ public class PulServiceImpl implements PulService {
     @Cacheable(cacheNames = "pulInfoList")
     @Override
     public List<PulListVO> queryPulByLinage(Integer taxonomyId, String assemblyAccession, String spSpecies, String spPhylum) {
-        if (Objects.isNull(taxonomyId) && Objects.isNull(assemblyAccession) && Objects.isNull(spSpecies) && Objects.isNull(spPhylum)) {
+        if (Objects.isNull(taxonomyId) && assemblyAccession.isBlank() && spSpecies.isBlank() && spPhylum.isBlank()) {
             return new LinkedList<>();
         }
         List<PulPO> pulPos = pulRepository.findAll((Specification<PulPO>) (root, criteriaQuery, criteriaBuilder) ->
@@ -183,7 +183,7 @@ public class PulServiceImpl implements PulService {
     @Cacheable(cacheNames = "pulInfoList")
     @Override
     public List<PulListVO> queryPulByDomainName(String domainName) {
-        if (Objects.isNull(domainName)) {
+        if (domainName.isBlank()) {
             return new LinkedList<>();
         }
         List<PulPO> pulPos = pulRepository.findAllByDomain(domainName.toLowerCase());

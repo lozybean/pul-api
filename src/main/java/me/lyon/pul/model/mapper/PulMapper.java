@@ -30,16 +30,8 @@ public interface PulMapper {
     PulInfo pulInfo(PulPO po);
 
     @Mapping(target = "pulType", source = "type")
-    @Mapping(target = "pulStart", source = "locusStart")
-    @Mapping(target = "pulEnd", source = "locusEnd")
     @Mapping(target = "assemblyAccession", source = "species.gcfNumber")
-    @Mapping(target = "assemblyLevel", source = "species.assembleLevel")
-    @Mapping(target = "taxonomyId", source = "species.taxid")
-    @Mapping(target = "spKingdom", source = "species.spKingdom")
     @Mapping(target = "spPhylum", source = "species.spPhylum")
-    @Mapping(target = "spClass", source = "species.spClass")
-    @Mapping(target = "spOrder", source = "species.spOrder")
-    @Mapping(target = "spFamily", source = "species.spFamily")
     @Mapping(target = "spSpecies", source = "species.spSpecies")
     PulListVO pulListVO(PulPO po);
 

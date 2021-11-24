@@ -10,6 +10,7 @@ import me.lyon.pul.service.PulService;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.util.StopWatch;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -93,13 +94,18 @@ public class PulController {
     public WebResponse<List<PulListVO>> queryAll(
             @RequestBody PulQuery query
     ) {
+        StopWatch stopWatch = new StopWatch();
+        stopWatch.start();
         boolean searchWithType = !query.getValPulType().isBlank();
         List<PulListVO> pulInfosByType = pulService.queryPulByType(query.getValPulType());
         Set<String> pulIdsByType = pulInfosByType.stream()
                 .parallel()
                 .map(PulListVO::getId)
                 .collect(Collectors.toSet());
+        stopWatch.stop();
+        log.info("query/all: searchWithType cost: {}ms", stopWatch.getLastTaskTimeMillis());
 
+        stopWatch.start();
         boolean searchWithLinage = Objects.nonNull(query.getValTaxonomyId()) ||
                 !query.getValAssemblyAccession().isBlank() ||
                 !query.getValSpecies().isBlank() ||
@@ -113,13 +119,19 @@ public class PulController {
                 .parallel()
                 .map(PulListVO::getId)
                 .collect(Collectors.toSet());
+        stopWatch.stop();
+        log.info("query/all: searchWithLinage cost: {}ms", stopWatch.getLastTaskTimeMillis());
 
+
+        stopWatch.start();
         boolean searchWithDomain = !query.getValDomainName().isBlank();
         List<PulListVO> pulInfosByDomain = pulService.queryPulByDomainName(query.getValDomainName());
         Set<String> pulIdsByDomain = pulInfosByDomain.stream()
                 .parallel()
                 .map(PulListVO::getId)
                 .collect(Collectors.toSet());
+        stopWatch.stop();
+        log.info("query/all: searchWithDomain cost: {}ms", stopWatch.getLastTaskTimeMillis());
 
         // 当未使用某个维度检索时，该维度不参与交集运算，为了统一逻辑，将该集合设置为并集
         // A = a | b | c
@@ -127,6 +139,7 @@ public class PulController {
         // ∴ A = b | c
         // ∴ A & B & C = (b|c) & b & c = b & c
         // 相当于 a 不参与交集运算
+        stopWatch.start();
         if (!searchWithType) {
             pulIdsByType.addAll(pulIdsByLinage);
             pulIdsByType.addAll(pulIdsByDomain);
@@ -143,13 +156,19 @@ public class PulController {
         Set<String> retainIds = new HashSet<>(pulIdsByType);
         retainIds.retainAll(pulIdsByLinage);
         retainIds.retainAll(pulIdsByDomain);
+        stopWatch.stop();
+        log.info("query/all: retail id set cost: {}ms", stopWatch.getLastTaskTimeMillis());
 
+        stopWatch.start();
         List<PulListVO> pulInfos = Stream.of(pulInfosByType, pulInfosByLinage, pulInfosByDomain)
                 .flatMap(Collection::stream)
+                .parallel()
                 .filter(pulInfo -> retainIds.contains(pulInfo.getId()))
                 .distinct()
                 .sorted(Comparator.comparing(PulListVO::getId))
                 .collect(Collectors.toList());
+        stopWatch.stop();
+        log.info("query/all: construct list cost: {}ms", stopWatch.getLastTaskTimeMillis());
 
         return WebResponse.ok(pulInfos);
     }
