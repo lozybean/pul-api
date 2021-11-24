@@ -195,12 +195,20 @@ public class PulServiceImpl implements PulService {
     @Cacheable(cacheNames = "aggregateByType")
     @Override
     public List<NameCount> aggregateByType() {
-        return pulRepository.countTotalPulPOSByTypeClass();
+        return pulRepository.countTotalPulPOSByTypeClass()
+                .stream()
+                .filter(o -> Objects.nonNull(o.getName()))
+                .sorted(Comparator.reverseOrder())
+                .collect(Collectors.toList());
     }
 
     @Cacheable(cacheNames = "aggregateByPhylum")
     @Override
     public List<NameCount> aggregateByPhylum() {
-        return pulRepository.countTotalPulPOSBySpeciesSpPhylumClass();
+        return pulRepository.countTotalPulPOSBySpeciesSpPhylumClass()
+                .stream()
+                .filter(o -> Objects.nonNull(o.getName()))
+                .sorted(Comparator.reverseOrder())
+                .collect(Collectors.toList());
     }
 }
