@@ -3,6 +3,7 @@ package me.lyon.pul.service;
 import me.lyon.pul.model.entity.NameCount;
 import me.lyon.pul.model.entity.PageData;
 import me.lyon.pul.model.entity.PulInfo;
+import me.lyon.pul.model.vo.PulListVO;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
@@ -25,10 +26,10 @@ public interface PulService {
      * @param pageable : 分页信息
      * @return :
      */
-    PageData<PulInfo> queryPulByType(String pulType, Pageable pageable);
+    PageData<PulListVO> queryPulByType(String pulType, Pageable pageable);
 
 
-    List<PulInfo> queryPulByType(String pulType);
+    List<PulListVO> queryPulByType(String pulType);
 
     /**
      * 通过物种信息 检索PUL
@@ -40,13 +41,13 @@ public interface PulService {
      * @param pageable          : 分页信息
      * @return :
      */
-    PageData<PulInfo> queryPulByLinage(Integer taxonomyId,
+    PageData<PulListVO> queryPulByLinage(Integer taxonomyId,
                                        String assemblyAccession,
                                        String spSpecies,
                                        String spPhylum,
                                        Pageable pageable);
 
-    List<PulInfo> queryPulByLinage(Integer taxonomyId,
+    List<PulListVO> queryPulByLinage(Integer taxonomyId,
                                    String assemblyAccession,
                                    String spSpecies,
                                    String spPhylum);
@@ -58,9 +59,9 @@ public interface PulService {
      * @param pageable   : 分页信息
      * @return :
      */
-    PageData<PulInfo> queryPulByDomainName(String domainName, Pageable pageable);
+    PageData<PulListVO> queryPulByDomainName(String domainName, Pageable pageable);
 
-    List<PulInfo> queryPulByDomainName(String domainName);
+    List<PulListVO> queryPulByDomainName(String domainName);
 
     /**
      * 根据类型聚合

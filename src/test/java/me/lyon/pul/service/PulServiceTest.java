@@ -1,7 +1,7 @@
 package me.lyon.pul.service;
 
 import me.lyon.pul.model.entity.PageData;
-import me.lyon.pul.model.entity.PulInfo;
+import me.lyon.pul.model.vo.PulListVO;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -12,7 +12,6 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import javax.annotation.Resource;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest
@@ -24,10 +23,10 @@ public class PulServiceTest {
 
     @Test
     public void queryPulByType() {
-        PageData<PulInfo> pulInfoPage = service.queryPulByType("agar", pageable);
+        PageData<PulListVO> pulInfoPage = service.queryPulByType("agar", pageable);
         Assert.assertEquals(186, pulInfoPage.getTotal().intValue());
 
-        List<PulInfo> pulInfos = service.queryPulByType("agar");
+        List<PulListVO> pulInfos = service.queryPulByType("agar");
         Assert.assertEquals(186, pulInfos.size());
         Assert.assertEquals(pulInfoPage.getList(), pulInfos.subList(0, 10));
     }
@@ -35,10 +34,10 @@ public class PulServiceTest {
     @Test
     public void queryPulByLinage() {
         // 1. query by tax id
-        PageData<PulInfo> pulInfoPageData = service.queryPulByLinage(203122, null, null, null, pageable);
+        PageData<PulListVO> pulInfoPageData = service.queryPulByLinage(203122, null, null, null, pageable);
         Assert.assertEquals(3, pulInfoPageData.getTotal().intValue());
 
-        List<PulInfo> pulInfos = service.queryPulByLinage(203122, null, null, null);
+        List<PulListVO> pulInfos = service.queryPulByLinage(203122, null, null, null);
         Assert.assertEquals(3, pulInfos.size());
         Assert.assertEquals(pulInfoPageData.getList(), pulInfos);
 
@@ -64,7 +63,6 @@ public class PulServiceTest {
 
         pulInfos = service.queryPulByLinage(null, null, null, "Firmicutes");
         Assert.assertEquals(3335, pulInfos.size());
-        System.out.println(pulInfoPageData.getList().stream().map(PulInfo::getId).collect(Collectors.toList()));
         Assert.assertEquals(pulInfoPageData.getList(), pulInfos.subList(0, 10));
 
         pulInfoPageData = service.queryPulByLinage(null, null, null, "other", pageable);
@@ -92,23 +90,23 @@ public class PulServiceTest {
 
     @Test
     public void fuzzyQueryPulByLinage() {
-        List<PulInfo> pulInfos = service.queryPulByLinage(null, null, "Clostridioides", null);
-        for (PulInfo pulInfo : pulInfos) {
+        List<PulListVO> pulInfos = service.queryPulByLinage(null, null, "Clostridioides", null);
+        for (PulListVO pulInfo : pulInfos) {
             Assert.assertTrue(pulInfo.getSpSpecies().toLowerCase().contains("clostridioides"));
         }
 
         pulInfos = service.queryPulByLinage(null, null, null, "Proteob");
-        for (PulInfo pulInfo : pulInfos) {
+        for (PulListVO pulInfo : pulInfos) {
             Assert.assertTrue(pulInfo.getSpPhylum().toLowerCase().contains("proteob"));
         }
     }
 
     @Test
     public void queryPulByDomainName() {
-        PageData<PulInfo> pulInfoPage = service.queryPulByDomainName("Response_reg", pageable);
+        PageData<PulListVO> pulInfoPage = service.queryPulByDomainName("Response_reg", pageable);
         Assert.assertEquals(5333, pulInfoPage.getTotal().intValue());
 
-        List<PulInfo> pulInfos = service.queryPulByDomainName("Response_reg");
+        List<PulListVO> pulInfos = service.queryPulByDomainName("Response_reg");
         Assert.assertEquals(5333, pulInfos.size());
         Assert.assertEquals(pulInfoPage.getList(), pulInfos.subList(0, 10));
 

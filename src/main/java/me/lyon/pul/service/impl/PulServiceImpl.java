@@ -6,6 +6,7 @@ import me.lyon.pul.model.po.PulPO;
 import me.lyon.pul.model.entity.NameCount;
 import me.lyon.pul.model.entity.PageData;
 import me.lyon.pul.model.entity.PulInfo;
+import me.lyon.pul.model.vo.PulListVO;
 import me.lyon.pul.repository.PulRepository;
 import me.lyon.pul.service.PulService;
 import org.springframework.cache.annotation.CacheConfig;
@@ -32,6 +33,7 @@ public class PulServiceImpl implements PulService {
     PulRepository pulRepository;
 
     static Map<String, String> sortFieldMap = Map.of(
+            "id", "id",
             "pul_id", "pulId",
             "pul_type", "type",
             "assembly_accession", "species.gcfNumber",
@@ -39,6 +41,7 @@ public class PulServiceImpl implements PulService {
             "phylum", "species.spPhylum"
     );
     static Map<String, String> nativeSortFieldMap = Map.of(
+            "id", "id",
             "pul_id", "pul_id",
             "pul_type", "type",
             "assembly_accession", "species.gcf_number",
@@ -61,6 +64,7 @@ public class PulServiceImpl implements PulService {
     private Sort mapSort(Sort sort, Map<String, String> fieldMap) {
         List<Sort.Order> newOrders = new ArrayList<>();
         for (Sort.Order order : sort) {
+            log.info("SORT by: {}", fieldMap.get(order.getProperty()));
             newOrders.add(new Sort.Order(order.getDirection(), fieldMap.get(order.getProperty())));
         }
         if (newOrders.isEmpty()) {
@@ -80,26 +84,27 @@ public class PulServiceImpl implements PulService {
 
     @Cacheable(cacheNames = "pulInfoPage")
     @Override
-    public PageData<PulInfo> queryPulByType(String pulType, Pageable pageable) {
+    public PageData<PulListVO> queryPulByType(String pulType, Pageable pageable) {
         pageable = mapPageable(pageable);
         Page<PulPO> pulPoPage = pulRepository.findAllByTypeIgnoreCase(pulType, pageable);
-        return PageData.<PulInfo>builder()
+        return PageData.<PulListVO>builder()
                 .list(pulPoPage.getContent()
                         .stream()
-                        .map(PulMapper.INSTANCE::pulInfo)
+                        .map(PulMapper.INSTANCE::pulListVO)
                         .collect(Collectors.toList()))
                 .total((int) pulPoPage.getTotalElements())
                 .build();
     }
 
+    @Cacheable(cacheNames = "pulInfoList")
     @Override
-    public List<PulInfo> queryPulByType(String pulType) {
+    public List<PulListVO> queryPulByType(String pulType) {
         if (Objects.isNull(pulType)) {
             return new LinkedList<>();
         }
         List<PulPO> pulPos = pulRepository.findAllByTypeIgnoreCaseOrderById(pulType);
         return pulPos.stream()
-                .map(PulMapper.INSTANCE::pulInfo)
+                .map(PulMapper.INSTANCE::pulListVO)
                 .collect(Collectors.toList());
     }
 
@@ -133,22 +138,23 @@ public class PulServiceImpl implements PulService {
 
     @Cacheable(cacheNames = "pulInfoPage")
     @Override
-    public PageData<PulInfo> queryPulByLinage(Integer taxonomyId, String assemblyAccession, String spSpecies, String spPhylum, Pageable pageable) {
+    public PageData<PulListVO> queryPulByLinage(Integer taxonomyId, String assemblyAccession, String spSpecies, String spPhylum, Pageable pageable) {
         pageable = mapPageable(pageable);
         Page<PulPO> pulPoPage = pulRepository.findAll((Specification<PulPO>) (root, criteriaQuery, criteriaBuilder) ->
                 this.buildCriteriaByLinage(root, criteriaQuery, criteriaBuilder,
                         taxonomyId, assemblyAccession, spSpecies, spPhylum), pageable);
-        return PageData.<PulInfo>builder()
+        return PageData.<PulListVO>builder()
                 .list(pulPoPage.getContent()
                         .stream()
-                        .map(PulMapper.INSTANCE::pulInfo)
+                        .map(PulMapper.INSTANCE::pulListVO)
                         .collect(Collectors.toList()))
                 .total((int) pulPoPage.getTotalElements())
                 .build();
     }
 
+    @Cacheable(cacheNames = "pulInfoList")
     @Override
-    public List<PulInfo> queryPulByLinage(Integer taxonomyId, String assemblyAccession, String spSpecies, String spPhylum) {
+    public List<PulListVO> queryPulByLinage(Integer taxonomyId, String assemblyAccession, String spSpecies, String spPhylum) {
         if (Objects.isNull(taxonomyId) && Objects.isNull(assemblyAccession) && Objects.isNull(spSpecies) && Objects.isNull(spPhylum)) {
             return new LinkedList<>();
         }
@@ -156,32 +162,33 @@ public class PulServiceImpl implements PulService {
                 this.buildCriteriaByLinage(root, criteriaQuery, criteriaBuilder,
                         taxonomyId, assemblyAccession, spSpecies, spPhylum), Sort.by("id"));
         return pulPos.stream()
-                .map(PulMapper.INSTANCE::pulInfo)
+                .map(PulMapper.INSTANCE::pulListVO)
                 .collect(Collectors.toList());
     }
 
     @Cacheable(cacheNames = "pulInfoPage")
     @Override
-    public PageData<PulInfo> queryPulByDomainName(String domainName, Pageable pageable) {
+    public PageData<PulListVO> queryPulByDomainName(String domainName, Pageable pageable) {
         pageable = mapNativePageable(pageable);
         Page<PulPO> pulPoPage = pulRepository.findAllByDomain(domainName.toLowerCase(), pageable);
-        return PageData.<PulInfo>builder()
+        return PageData.<PulListVO>builder()
                 .list(pulPoPage.getContent()
                         .stream()
-                        .map(PulMapper.INSTANCE::pulInfo)
+                        .map(PulMapper.INSTANCE::pulListVO)
                         .collect(Collectors.toList()))
                 .total((int) pulPoPage.getTotalElements())
                 .build();
     }
 
+    @Cacheable(cacheNames = "pulInfoList")
     @Override
-    public List<PulInfo> queryPulByDomainName(String domainName) {
+    public List<PulListVO> queryPulByDomainName(String domainName) {
         if (Objects.isNull(domainName)) {
             return new LinkedList<>();
         }
         List<PulPO> pulPos = pulRepository.findAllByDomain(domainName.toLowerCase());
         return pulPos.stream()
-                .map(PulMapper.INSTANCE::pulInfo)
+                .map(PulMapper.INSTANCE::pulListVO)
                 .collect(Collectors.toList());
     }
 
