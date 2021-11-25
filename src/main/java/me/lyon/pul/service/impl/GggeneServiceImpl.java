@@ -26,7 +26,7 @@ public class GggeneServiceImpl implements GggeneService {
     RConnection rConnection;
 
     private static final Map<String, String> CLASSIFICATION_FULL_NAME = Map.of(
-            "MME", "mono saccharide metabolic enzymes",
+            "MME", "monosaccharide metabolic enzymes",
             "TF", "Transcription factor"
     );
 
@@ -68,7 +68,7 @@ public class GggeneServiceImpl implements GggeneService {
                         "  facet_wrap(~ molecule, scales = \"free\", ncol = 1) +\n" +
                         "  scale_fill_manual(values=myColors) +\n" +
                         "  theme_genes() +\n" +
-                        "  guides(fill=guide_legend(nrow=2,byrow=TRUE)) +\n" +
+                        "  guides(fill=guide_legend(nrow=2,byrow=FALSE)) +\n" +
                         "  theme(legend.position=\"top\", legend.title = element_text( size=12, face=\"bold\"), axis.title.y=element_blank()) +\n" +
                         "  xlab(\"%s\")",
                 arrowStart, geneName[0],

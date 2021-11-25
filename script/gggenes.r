@@ -11,10 +11,10 @@ encodeGraphic <- function(g) {
   img <- base64enc::dataURI(file = fn, mime = "image/png")
   return(img)
 }
-myColors <- c("mono saccharide metabolic enzymes"="#1F78B4",
-              "Transcription factor"="#B2DF8A",
-              "carbonhydrate active enzymes"="#33A02C",
+myColors <- c("monosaccharide metabolic enzymes"="#1F78B4",
               "sugar transporter or sugar binding protein"="#FB9A99",
+              "carbonhydrate active enzymes"="#33A02C",
+              "Transcription factor"="#B2DF8A",
               "UNKNOWN"="#A6CEE3")
 sub_genes = subset(example_genes, molecule=="Genome5")
 sub_genes$classification <- c("Transcription factor", "Transcription factor", "UNKNOWN",
@@ -33,7 +33,7 @@ gg <- ggplot(sub_genes, aes(xmin = start, xmax = end, y = molecule, fill=classif
   theme(legend.position="top",
         legend.title = element_text( size=12, face="bold"),
         axis.title.y=element_blank()) +
-  guides(fill=guide_legend(nrow=5,byrow=TRUE)) +
+  guides(fill=guide_legend(nrow=2,byrow=FALSE)) +
   xlab("species name")
 
 hg <- encodeGraphic(gg)
