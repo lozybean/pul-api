@@ -4,7 +4,7 @@ spring:
   cache:
     type: redis
     redis:
-      time-to-live: "P1D"
+      time-to-live: "P5D"
   jackson:
     time-zone: GMT+8
     date-format: yyyy-MM-dd HH:mm:ss
@@ -31,3 +31,13 @@ server:
 rserver:
   host: ${RSERVER_HOST}
   port: ${RSERVER_PORT}
+
+predict:
+  docker-image: ${PREDICT_IMAGE}
+  docker-cpu: ${PREDICT_DOCKER_CPU}
+  docker-memory: ${PREDICT_DOCKER_MEM}
+  max-retry-times: ${PREDICT_RETRY_TIMES}
+  reserve-result-days: ${PREDICT_RESERVE_DAYS}
+  reference-path: ${PREDICT_REFERENCE_PATH}
+  input-path: ${PREDICT_INPUT_PATH}
+  output-path: ${PREDICT_OUTPUT_PATH}
