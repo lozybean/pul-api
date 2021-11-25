@@ -60,7 +60,7 @@ public class PredictServiceImpl implements PredictService {
     }
 
     private Path createInputFile(String token, MultipartFile file) {
-        Path inputFile = Path.of(config.getInputPath(), token + ".gbff");
+        Path inputFile = Path.of(config.getInputPath(), token + ".fasta");
         try (FileOutputStream os = new FileOutputStream(inputFile.toFile())) {
             IOUtils.write(file.getBytes(), os);
         } catch (IOException e) {

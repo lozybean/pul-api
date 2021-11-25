@@ -17,7 +17,7 @@ import javax.annotation.Resource;
 import java.io.IOException;
 import java.util.Optional;
 
-@Ignore
+//@Ignore
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest
 public class PredictServiceImplTest {
@@ -38,8 +38,8 @@ public class PredictServiceImplTest {
         Assert.assertEquals(ContainerStatus.CREATED, jobInfo.getContainerState().getStatus());
 
         // remove job info
-        String containerId = jobInfo.getContainerState().getId();
-        predictService.cleanPredictJob(containerId);
+        String token = jobInfo.getToken();
+        predictService.cleanPredictJob(token);
     }
 
     @Test
