@@ -116,7 +116,7 @@ public class PredictServiceImpl implements PredictService {
                         .withBinds(
                                 Bind.parse(String.format("%s:/home/tao/Documents", config.getReferencePath())),
                                 Bind.parse(String.format("%s:/home/tao/Documents/PUL_prediction_online_analysis/Output_file:rw", outputPath)),
-                                Bind.parse(String.format("%s:/home/tao/Documents/PUL_prediction_online_analysis/Genomes/GCF_000013665.1_ASM1366v1_genomic.gbff:rw", inputFile))
+                                Bind.parse(String.format("%s:/home/tao/Documents/PUL_prediction_online_analysis/Genomes/protein.fas:rw", inputFile))
                         ))) {
 
             CreateContainerResponse response = cmd.exec();
