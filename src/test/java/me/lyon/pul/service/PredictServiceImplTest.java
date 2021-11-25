@@ -3,8 +3,8 @@ package me.lyon.pul.service;
 import me.lyon.pul.constant.ContainerStatus;
 import me.lyon.pul.constant.JobStatus;
 import me.lyon.pul.model.entity.JobInfo;
-import me.lyon.pul.model.entity.PulInfo;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,16 +15,16 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import javax.annotation.Resource;
 import java.io.IOException;
-import java.util.List;
 import java.util.Optional;
 
+@Ignore
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest
 public class PredictServiceImplTest {
     @Resource
     PredictService predictService;
 
-    private final org.springframework.core.io.Resource fileResource = new ClassPathResource("GCF_000013665.1_ASM1366v1_genomic.gbff");
+    private final org.springframework.core.io.Resource fileResource = new ClassPathResource("protein.fas");
 
     @Test
     public void createPulPredictContainer() throws IOException {
@@ -50,8 +50,8 @@ public class PredictServiceImplTest {
     }
 
     @Test
-    public void readResult() {
-        List<PulInfo> pulInfoList = predictService.readPredictResult("MUt1aXRXQ09RNXNFQzJDRw");
-        System.out.println(pulInfoList);
+    public void readResult() throws IOException {
+        String result = predictService.readPredictResult("eWU5THJEd29DNGNlc2x5cg");
+        System.out.println(result);
     }
 }

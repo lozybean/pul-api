@@ -1,9 +1,9 @@
 package me.lyon.pul.service;
 
 import me.lyon.pul.model.entity.JobInfo;
-import me.lyon.pul.model.entity.PulInfo;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -75,5 +75,5 @@ public interface PredictService {
      * @param token :
      * @return : predict pul result
      */
-    List<PulInfo> readPredictResult(String token);
+    String readPredictResult(String token) throws IOException;
 }
