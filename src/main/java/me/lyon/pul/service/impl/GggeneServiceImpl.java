@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -23,6 +24,11 @@ import java.util.stream.Collectors;
 public class GggeneServiceImpl implements GggeneService {
     @Resource(name = "rConnection")
     RConnection rConnection;
+
+    private static final Map<String, String> CLASSIFICATION_FULL_NAME = Map.of(
+            "MME", "mono saccharide metabolic enzymes",
+            "TF", "Transcription factor"
+    );
 
     private synchronized String plotByRConnection(PulInfo pulInfo) throws REngineException, REXPMismatchException {
         String speciesName = pulInfo.getSpSpecies();
@@ -36,7 +42,11 @@ public class GggeneServiceImpl implements GggeneService {
         int[] strand = pulContents.stream().map(PulContent::getStrand).mapToInt(i -> i).toArray();
         int arrowStart = Math.min(starts[0], ends[0]);
         int arrowEnd = Math.max(ends[ends.length - 1], starts[starts.length - 1]);
-        String[] classification = pulContents.stream().map(PulContent::getGeneType).toArray(String[]::new);
+        String[] classification = pulContents
+                .stream()
+                .map(PulContent::getGeneType)
+                .map(s -> CLASSIFICATION_FULL_NAME.getOrDefault(s, s))
+                .toArray(String[]::new);
 
         String[] molecule = new String[ends.length];
         Arrays.fill(molecule, pulInfo.getContigName());
@@ -58,6 +68,7 @@ public class GggeneServiceImpl implements GggeneService {
                         "  facet_wrap(~ molecule, scales = \"free\", ncol = 1) +\n" +
                         "  scale_fill_manual(values=myColors) +\n" +
                         "  theme_genes() +\n" +
+                        "  guides(fill=guide_legend(nrow=2,byrow=TRUE)) +\n" +
                         "  theme(legend.position=\"top\", legend.title = element_text( size=12, face=\"bold\"), axis.title.y=element_blank()) +\n" +
                         "  xlab(\"%s\")",
                 arrowStart, geneName[0],
