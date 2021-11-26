@@ -60,14 +60,14 @@ services:
       RSERVER_HOST: 'rserver'
       RSERVER_PORT: 6311
       PREDICT_IMAGE: 'pul-predict:1.0.0'
-      docker-cpu: '1'
-      docker-memory: '100000000'
-      max-retry-times: '3'
-      reserve-result-days: '7'
+      PREDICT_DOCKER_CPU: '1'
+      PREDICT_DOCKER_MEM: '100000000'
+      PREDICT_RETRY_TIMES: '3'
+      PREDICT_RESERVE_DAYS: '7'
       # 这边配置的是宿主地址，而非pul-api容器内地址，用于启动pul-predict容器时挂载
-      reference-path: "/home/songtao/Upload/pul/data/predict/predict"
-      input-path: "/home/songtao/Upload/pul/data/predict/input"
-      output-path: "/home/songtao/Upload/pul/data/predict/output"
+      PREDICT_REFERENCE_PATH: "/home/songtao/Upload/pul/data/predict"
+      PREDICT_INPUT_PATH: "/home/songtao/Upload/pul/data/predict/input"
+      PREDICT_OUTPUT_PATH: "/home/songtao/Upload/pul/data/predict/output"
     depends_on:
       - db
       - rserver
