@@ -36,6 +36,7 @@ predict:
   docker-image: ${PREDICT_IMAGE}
   docker-cpu: ${PREDICT_DOCKER_CPU}
   docker-memory: ${PREDICT_DOCKER_MEM}
+  docker-api-version: ${PREDICT_DOCKER_API_VERSION:1.39}
   max-retry-times: ${PREDICT_RETRY_TIMES}
   reserve-result-days: ${PREDICT_RESERVE_DAYS}
   reference-path: ${PREDICT_REFERENCE_PATH}

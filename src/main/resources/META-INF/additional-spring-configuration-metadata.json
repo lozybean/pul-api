@@ -17,12 +17,12 @@
     },
     {
       "name": "predict.docker-cpu",
-      "type": "java.lang.String",
+      "type": "java.lang.Integer",
       "description": "cpu count for pul predicate container."
     },
     {
       "name": "predict.docker-memory",
-      "type": "java.lang.String",
+      "type": "java.lang.Long",
       "description": "memory bytes for pul predicate container."
     },
     {
@@ -42,13 +42,18 @@
     },
     {
       "name": "predict.max-retry-times",
-      "type": "java.lang.String",
+      "type": "java.lang.Integer",
       "description": "max retry times until job is failed or success."
     },
     {
       "name": "predict.reserve-result-days",
-      "type": "java.lang.String",
+      "type": "java.lang.Integer",
       "description": "how many days to reserve result."
+    },
+    {
+      "name": "predict.docker-api-version",
+      "type": "java.lang.String",
+      "description": "Description for predict.docker-api-version."
     }
   ]
 }

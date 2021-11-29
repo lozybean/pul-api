@@ -20,6 +20,7 @@ public class PredictConfig {
     private String dockerImage = "pul-predict:1.0.0";
     private Long dockerCpu = 1L;
     private Long dockerMemory = 100_000_000L;
+    private String dockerApiVersion = "1.39";
     private Long maxRetryTimes = 3L;
     private Long reserveResultDays = 7L;
     private String referencePath;
@@ -33,7 +34,7 @@ public class PredictConfig {
         return DefaultDockerClientConfig.createDefaultConfigBuilder()
                 .withDockerHost(SOCKET_FILE)
                 .withDockerTlsVerify(false)
-                .withApiVersion("1.41")
+                .withApiVersion(dockerApiVersion)
                 .build();
     }
 

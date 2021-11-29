@@ -68,6 +68,10 @@ services:
       PREDICT_REFERENCE_PATH: "/home/songtao/Upload/pul/data/predict"
       PREDICT_INPUT_PATH: "/home/songtao/Upload/pul/data/predict/input"
       PREDICT_OUTPUT_PATH: "/home/songtao/Upload/pul/data/predict/output"
+    volumes:
+      # 挂载和宿主一样的目录，为了成功创建输入、输出文件
+      - "/home/songtao/Upload/pul/data/predict:/home/songtao/Upload/pul/data/predict"
+      - "/var/run/docker.sock:/var/run/docker.sock"
     depends_on:
       - db
       - rserver

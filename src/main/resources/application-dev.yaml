@@ -13,7 +13,7 @@ spring:
     username: 'pul'
     password: 'L0ngL1vE@CPC'
   jpa:
-    show-sql: true
+    show-sql: false
     database-platform: org.hibernate.dialect.PostgreSQLDialect
   servlet:
     multipart:
@@ -26,7 +26,7 @@ spring:
     database: 1
 
 server:
-  port: 8081
+  port: 8181
 
 rserver:
   host: '127.0.0.1'
@@ -35,6 +35,7 @@ rserver:
 predict:
   docker-image: 'pul-predict:1.0.0'
   docker-cpu: 1
+  docker-api-version: '1.39'
   docker-memory: 100000000
   max-retry-times: 3
   reserve-result-days: 7
