@@ -33,6 +33,7 @@ import javax.annotation.Resource;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
@@ -42,6 +43,7 @@ import java.util.stream.Collectors;
 @Service
 @CacheConfig(cacheNames = {"predictJob", "predictResult"})
 public class PredictServiceImpl implements PredictService {
+    private static final String INPUT_FORMAT = ".fasta";
     @Resource(name = "predictConfig")
     PredictConfig config;
     @Resource(name = "dockerClient")
@@ -60,9 +62,20 @@ public class PredictServiceImpl implements PredictService {
     }
 
     private Path createInputFile(String token, MultipartFile file) {
-        Path inputFile = Path.of(config.getInputPath(), token + ".fasta");
+        Path inputFile = Path.of(config.getInputPath(), token + INPUT_FORMAT);
         try (FileOutputStream os = new FileOutputStream(inputFile.toFile())) {
             IOUtils.write(file.getBytes(), os);
+        } catch (IOException e) {
+            log.error("create input file failed! {}", inputFile);
+            throw new RuntimeIOException("create input file failed!");
+        }
+        return inputFile;
+    }
+
+    private Path createInputFile(String token, String fasta) {
+        Path inputFile = Path.of(config.getInputPath(), token + INPUT_FORMAT);
+        try (FileOutputStream os = new FileOutputStream(inputFile.toFile())) {
+            IOUtils.write(fasta.getBytes(StandardCharsets.UTF_8), os);
         } catch (IOException e) {
             log.error("create input file failed! {}", inputFile);
             throw new RuntimeIOException("create input file failed!");
@@ -92,13 +105,7 @@ public class PredictServiceImpl implements PredictService {
                 .orElseThrow(() -> new NotFoundException("can not find related job of token: {}" + token));
     }
 
-    @Transactional(rollbackFor = Exception.class)
-    @Override
-    public JobInfo createPredictJob(MultipartFile file) {
-        String token = TokenUtils.generateNewToken();
-        Path outputPath = createOutputDir(token);
-        Path inputFile = createInputFile(token, file);
-
+    private JobInfo createPredictJob(String token, Path inputFile, Path outputPath) {
         try (CreateContainerCmd cmd = dockerClient.createContainerCmd(config.getDockerImage())
                 .withHostConfig(HostConfig.newHostConfig()
                         .withCpuCount(config.getDockerCpu())
@@ -126,6 +133,25 @@ public class PredictServiceImpl implements PredictService {
             repository.save(jobInfoPO);
             return JobInfoMapper.INSTANCE.entity(jobInfoPO);
         }
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public JobInfo createPredictJob(MultipartFile file) {
+        String token = TokenUtils.generateNewToken();
+        Path outputPath = createOutputDir(token);
+        Path inputFile = createInputFile(token, file);
+
+        return this.createPredictJob(token, inputFile, outputPath);
+    }
+
+    @Override
+    public JobInfo createPredictJob(String fasta) {
+        String token = TokenUtils.generateNewToken();
+        Path outputPath = createOutputDir(token);
+        Path inputFile = createInputFile(token, fasta);
+
+        return this.createPredictJob(token, inputFile, outputPath);
     }
 
     private void increaseRetryTime(JobInfo jobInfo) {
@@ -210,7 +236,7 @@ public class PredictServiceImpl implements PredictService {
         }
         try {
             File outputDir = Path.of(config.getOutputPath(), token).toFile();
-            File inputFile = Path.of(config.getInputPath(), token + ".fasta").toFile();
+            File inputFile = Path.of(config.getInputPath(), token + INPUT_FORMAT).toFile();
             FileUtils.deleteDirectory(outputDir);
             FileUtils.deleteQuietly(inputFile);
             JobInfoPO po = JobInfoMapper.INSTANCE.po(jobInfo);

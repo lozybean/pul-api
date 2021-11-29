@@ -31,12 +31,19 @@ public interface PredictService {
     JobInfo findByToken(String token);
 
     /**
-     * create predict job by Input Gbff file
+     * create predict job by Input Fasta file
      *
-     * @param file : input gbff format file
+     * @param file : input .fasta format file
      * @return : job info
      */
     JobInfo createPredictJob(MultipartFile file);
+
+    /**
+     * create predict job by plain text fasta
+     * @param fasta :
+     * @return :
+     */
+    JobInfo createPredictJob(String fasta);
 
     /**
      * start predict job

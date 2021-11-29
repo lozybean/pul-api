@@ -3,7 +3,6 @@ package me.lyon.pul.controller;
 import lombok.extern.slf4j.Slf4j;
 import me.lyon.pul.constant.JobStatus;
 import me.lyon.pul.model.entity.*;
-import me.lyon.pul.service.GggeneService;
 import me.lyon.pul.service.PredictService;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -17,12 +16,21 @@ import java.io.IOException;
 public class PredictController {
     @Resource
     PredictService predictService;
-    @Resource
-    GggeneService gggeneService;
 
-    @PostMapping
-    public WebResponse<JobInfo> submitPredictJob(MultipartFile file) {
+    @PostMapping("file")
+    public WebResponse<JobInfo> submitPredictJobByFile(MultipartFile file) {
         JobInfo jobInfo = predictService.createPredictJob(file);
+        // hidden some field
+        jobInfo.setId(null);
+        jobInfo.setContainerState(null);
+        return WebResponse.ok(jobInfo);
+    }
+
+    @PostMapping("fasta")
+    public WebResponse<JobInfo> submitPredictJobByPlain(
+            @RequestBody String fasta
+    ) {
+        JobInfo jobInfo = predictService.createPredictJob(fasta);
         // hidden some field
         jobInfo.setId(null);
         jobInfo.setContainerState(null);
