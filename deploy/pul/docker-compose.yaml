@@ -30,7 +30,7 @@ services:
       - "6379:6379"
 
   sql-migration:
-    image: pul-sql-migration:2.0.0
+    image: pul-sql-migration:2.1.0
     entrypoint:
       - flyway
       - migrate
@@ -43,7 +43,7 @@ services:
     depends_on:
       - db
   pul-api:
-    image: pul-api:2.0.0
+    image: pul-api:2.1.0
     expose:
       - "8080"
     environment:

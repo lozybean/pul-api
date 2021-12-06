@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -24,11 +23,6 @@ import java.util.stream.Collectors;
 public class GggeneServiceImpl implements GggeneService {
     @Resource(name = "rConnection")
     RConnection rConnection;
-
-    private static final Map<String, String> CLASSIFICATION_FULL_NAME = Map.of(
-            "MME", "monosaccharide metabolic enzymes",
-            "TF", "Transcription factor"
-    );
 
     private synchronized String plotByRConnection(PulInfo pulInfo) throws REngineException, REXPMismatchException {
         String speciesName = pulInfo.getSpSpecies();
@@ -45,7 +39,6 @@ public class GggeneServiceImpl implements GggeneService {
         String[] classification = pulContents
                 .stream()
                 .map(PulContent::getGeneType)
-                .map(s -> CLASSIFICATION_FULL_NAME.getOrDefault(s, s))
                 .toArray(String[]::new);
 
         String[] molecule = new String[ends.length];

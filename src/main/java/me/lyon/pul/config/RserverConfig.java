@@ -28,11 +28,11 @@ public class RserverConfig {
                 "  return(img)\n" +
                 "}");
         rConnection.eval("palette_Set3 <- colorRampPalette(brewer.pal(12, \"Set3\"))");
-        rConnection.eval("myColors <- c(\"monosaccharide metabolic enzymes\"=\"#1F78B4\",\n" +
-                "              \"sugar transporter or sugar binding protein\"=\"#FB9A99\",\n" +
-                "              \"carbonhydrate active enzymes\"=\"#33A02C\",\n" +
-                "              \"Transcription factor\"=\"#B2DF8A\",\n" +
-                "              \"UNKNOWN\"=\"#A6CEE3\")");
+        rConnection.eval("myColors <- c(\"Monosaccharide metabolic enzyme\"=\"#de425b\",\n" +
+                "              \"Sugar transporter or sugar binding protein\"=\"#665191\",\n" +
+                "              \"Carbohydrate active enzymes\"=\"#004c6d\",\n" +
+                "              \"Transcription factor\"=\"#488f31\",\n" +
+                "              \"UNKNOWN\"=\"#5e616d\")");
         return rConnection;
     }
 }
