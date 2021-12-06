@@ -81,7 +81,7 @@ services:
       - rserver
       - redis
   pul:
-    image: pul:2.0.0
+    image: pul:2.1.1
     expose:
       - "81:80"
     ports:

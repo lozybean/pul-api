@@ -30,9 +30,9 @@ public class RserverConfig {
         rConnection.eval("palette_Set3 <- colorRampPalette(brewer.pal(12, \"Set3\"))");
         rConnection.eval("myColors <- c(\"Monosaccharide metabolic enzyme\"=\"#de425b\",\n" +
                 "              \"Sugar transporter or sugar binding protein\"=\"#665191\",\n" +
-                "              \"Carbohydrate active enzymes\"=\"#004c6d\",\n" +
+                "              \"Carbohydrate active enzymes\"=\"#146EB4\",\n" +
                 "              \"Transcription factor\"=\"#488f31\",\n" +
-                "              \"UNKNOWN\"=\"#5e616d\")");
+                "              \"UNKNOWN\"=\"#404040\")");
         return rConnection;
     }
 }
