@@ -43,7 +43,7 @@ services:
     depends_on:
       - db
   pul-api:
-    image: pul-api:2.1.0
+    image: pul-api:2.1.1
     expose:
       - "8080"
     environment:
